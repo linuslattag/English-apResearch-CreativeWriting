@@ -1033,7 +1033,7 @@ const S = {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById('screen-' + id);
-  el.classList.add('active');
+  if(el) el.classList.add('active');
   window.scrollTo(0, 0);
 }
 
@@ -1041,26 +1041,34 @@ function showScreen(id) {
    WELCOME
    ======================================================= */
 
-document.getElementById('welcome-form').addEventListener('submit', e => {
-  e.preventDefault();
-  const name  = document.getElementById('inp-name').value.trim();
-  const topic = document.getElementById('inp-topic').value.trim();
-  if (!name || !topic) return;
+// Using DOMContentLoaded to ensure the form is loaded securely 
+// before attaching the event listener. This prevents script failures.
+document.addEventListener("DOMContentLoaded", () => {
+  const welcomeForm = document.getElementById('welcome-form');
+  
+  if (welcomeForm) {
+    welcomeForm.addEventListener('submit', function(e) {
+      e.preventDefault(); // This is the crucial line that stops the page from reloading!
+      
+      const name  = document.getElementById('inp-name').value.trim();
+      const topic = document.getElementById('inp-topic').value.trim();
+      if (!name || !topic) return;
 
-  S.name  = name;
-  S.topic = topic;
+      S.name  = name;
+      S.topic = topic;
 
-  // Pick a set — prefer the other one from last session for variety
-  if (S.lastSetIdx === 0)       S.setIdx = 1;
-  else if (S.lastSetIdx === 1)  S.setIdx = 0;
-  else                          S.setIdx = Math.random() < 0.5 ? 0 : 1;
+      if (S.lastSetIdx === 0)       S.setIdx = 1;
+      else if (S.lastSetIdx === 1)  S.setIdx = 0;
+      else                          S.setIdx = Math.random() < 0.5 ? 0 : 1;
 
-  S.srcIdx   = 0;
-  S.rulings  = [];
-  S.qAnswers = Array.from({ length: 5 }, () => [null, null, null, null]);
+      S.srcIdx   = 0;
+      S.rulings  = [];
+      S.qAnswers = Array.from({ length: 5 }, () => [null, null, null, null]);
 
-  renderSource(0);
-  showScreen('source');
+      renderSource(0);
+      showScreen('source');
+    });
+  }
 });
 
 function goLeaderboard() {
@@ -1193,4 +1201,111 @@ function calcScore() {
 const RANKS = ['Back to Law School', 'Needs More Evidence', 'Promising Bench', 'Sharp Judicial Eye', 'Perfect Record'];
 
 function renderVerdict(score) {
-  const set   = SETS[S.
+  const set   = SETS[S.setIdx];
+  const total = set.sources.length;
+  const rank  = RANKS[score] || RANKS[0];
+
+  const cards = set.sources.map((src, i) => {
+    const correct     = S.rulings[i] === src.ruling;
+    const yourRuling  = S.rulings[i];
+    const yourChip    = yourRuling === 'admissible' ? 'chip chip-your-a' : 'chip chip-your-d';
+    const expChip     = src.ruling  === 'admissible' ? 'chip chip-exp-a'  : 'chip chip-exp-d';
+    return `
+      <div class="vcard ${correct ? 'vright' : 'vwrong'}">
+        <div class="vstamp ${correct ? 'st-right' : 'st-wrong'}">${correct ? '✓' : '✗'}</div>
+        <div class="vcard-body">
+          <div class="vcard-title">${src.title}</div>
+          <div class="vcard-chips">
+            <span class="${yourChip}">You: ${yourRuling}</span>
+            <span class="${expChip}">Expert: ${src.ruling}</span>
+          </div>
+          <div class="vcard-explanation">${src.explanation}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('screen-verdict').innerHTML = `
+    <div class="verdict-hero">
+      <span class="verdict-hero-icon">⚖</span>
+      <h1>COURT ADJOURNED</h1>
+      <div class="score-wrap">
+        <span class="score-n">${score}</span>
+        <span class="score-d">/${total}</span>
+      </div>
+      <div class="score-rank">${rank} &middot; Judge ${S.name}</div>
+    </div>
+
+    <div class="verdict-divider">Case Summary</div>
+
+    <div id="verdict-cards">${cards}</div>
+
+    <div class="verdict-actions">
+      <button class="btn-outline" onclick="playAgain()">Try Another Case</button>
+      <button class="btn-solid"   onclick="goLeaderboard()">Hall of Judges</button>
+    </div>`;
+}
+
+function playAgain() {
+  const saved = S.name;
+  S.srcIdx   = 0;
+  S.rulings  = [];
+  S.qAnswers = [];
+  document.getElementById('inp-name').value  = saved;
+  document.getElementById('inp-topic').value = '';
+  showScreen('welcome');
+}
+
+/* =======================================================
+   LEADERBOARD
+   ======================================================= */
+
+const LB_KEY = 'sourcecourt_v1_lb';
+
+function saveScore(name, topic, score, setTopic) {
+  const lb = loadLB();
+  lb.push({
+    name,
+    topic,
+    score,
+    setTopic,
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  });
+  lb.sort((a, b) => b.score - a.score || 0);
+  try { localStorage.setItem(LB_KEY, JSON.stringify(lb.slice(0, 100))); } catch(e) {}
+}
+
+function loadLB() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+  catch { return []; }
+}
+
+function clearLB() {
+  if (!confirm('Clear the entire Hall of Judges? This cannot be undone.')) return;
+  try { localStorage.removeItem(LB_KEY); } catch(e) {}
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const entries = loadLB();
+  let body = '';
+
+  if (entries.length === 0) {
+    body = `
+      <tr><td colspan="5">
+        <div class="lb-empty">
+          <span class="lb-empty-icon">⚖</span>
+          <p>No rulings on record yet.<br>Be the first judge to enter the court.</p>
+        </div>
+      </td></tr>`;
+  } else {
+    body = entries.map((e, i) => {
+      const rank = i + 1;
+      const rankEl = rank === 1 ? `<span class="rank-gold">🥇</span>`
+                   : rank === 2 ? `<span class="rank-silver">🥈</span>`
+                   : rank === 3 ? `<span class="rank-bronze">🥉</span>`
+                   : `<span class="rank-plain">#${rank}</span>`;
+      const sc    = e.score === 5
+        ? `<span class="score-col score-perfect">${e.score}/5 ★</span>`
+        : `<span class="score-col">${e.score}/5</span>`;
+      const nm    = e.name.length > 20 ? e.name.slice(0,18) + '…' : e.name;
+      const tp    = (e.setTopic || '').length > 22 ? (e.setTopic||'').slice(0,20)+'…
