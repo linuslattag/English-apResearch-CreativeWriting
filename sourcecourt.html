@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Source Court — AP Research Edition</title>
+<style>
+/* ===== RESET & ROOT ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:          #07091a;
+  --surface:     #0f1424;
+  --card:        #131828;
+  --card2:       #1a2040;
+  --gold:        #c9a84c;
+  --gold-bright: #f0c94a;
+  --gold-dim:    rgba(201,168,76,0.18);
+  --gold-border: rgba(201,168,76,0.35);
+  --text:        #e4e6f2;
+  --muted:       #6b7492;
+  --red:         #e63946;
+  --red-dim:     rgba(230,57,70,0.12);
+  --green:       #2a9d8f;
+  --green-dim:   rgba(42,157,143,0.12);
+  --radius:      12px;
+  --shadow:      0 6px 28px rgba(0,0,0,0.5);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 60% 50% at 15% 60%, rgba(201,168,76,0.04) 0%, transparent 100%),
+    radial-gradient(ellipse 60% 40% at 85% 20%, rgba(42,100,157,0.04) 0%, transparent 100%);
+}
+
+/* ===== SCREENS ===== */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: block; animation: fadeUp 0.3s ease; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== SHARED UTILITY ===== */
+.gold { color: var(--gold); }
+.muted { color: var(--muted); }
+.sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+.uppercase { text-transform: uppercase; letter-spacing: 0.14em; }
+.center { text-align: center; }
+
+/* ===== WELCOME SCREEN ===== */
+#screen-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px 60px;
+  gap: 0;
+}
+#screen-welcome.active { display: flex; }
+
+.emblem {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.emblem-icon {
+  font-size: 60px;
+  display: block;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 24px rgba(201,168,76,0.45));
+  animation: glow 3s ease-in-out infinite alternate;
+}
+@keyframes glow {
+  from { filter: drop-shadow(0 0 12px rgba(201,168,76,0.3)); }
+  to   { filter: drop-shadow(0 0 28px rgba(201,168,76,0.6)); }
+}
+.emblem-title {
+  font-size: clamp(38px, 9vw, 58px);
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 40px rgba(201,168,76,0.25);
+  line-height: 1;
+}
+.emblem-sub {
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+.welcome-card {
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.welcome-card h2 {
+  font-size: 20px;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 10px;
+}
+.welcome-intro {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.65;
+  text-align: center;
+  margin-bottom: 26px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+.welcome-intro em { color: var(--text); font-style: normal; }
+
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 7px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+.form-group input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 11px 15px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: Georgia, serif;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+}
+.form-group input::placeholder { color: #3a4060; }
+
+.btn-enter {
+  width: 100%;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-enter:hover { background: var(--gold-bright); }
+.btn-enter:active { transform: scale(0.98); }
+
+.welcome-footer {
+  margin-top: 16px;
+  text-align: center;
+}
+.btn-ghost {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px 8px;
+  letter-spacing: 0.05em;
+}
+.btn-ghost:hover { color: var(--gold); }
+
+/* ===== SOURCE SCREEN ===== */
+#screen-source {
+  padding: 0 0 80px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(7,9,26,0.9);
+  border-bottom: 1px solid var(--gold-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+.topbar-logo {
+  font-size: 13px;
+  color: var(--gold);
+  letter-spacing: 0.14em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.topbar-progress {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+.progress-track {
+  height: 2px;
+  background: rgba(201,168,76,0.12);
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+.source-body { padding: 24px 20px 0; }
+
+.case-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.exhibit-tag {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+.type-badge {
+  background: var(--gold-dim);
+  border: 1px solid var(--gold-border);
+  color: var(--gold);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+/* Case File Card */
+.case-file {
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.case-file-top {
+  padding: 20px 22px 18px;
+  border-bottom: 1px solid rgba(201,168,76,0.08);
+}
+.source-title {
+  font-size: 17px;
+  color: #fff;
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+.meta-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+}
+.meta-k {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  white-space: nowrap;
+  line-height: 2;
+}
+.meta-v {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  line-height: 2;
+}
+.excerpt-area {
+  padding: 16px 22px;
+  background: rgba(0,0,0,0.22);
+}
+.excerpt-kicker {
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  display: block;
+  margin-bottom: 8px;
+}
+.excerpt-quote {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* Cross-Examination */
+.cross-exam {
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.cross-exam-title {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cross-exam-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gold-border);
+}
+
+.q-row {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.q-row:last-child { border-bottom: none; }
+.q-text {
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.45;
+  padding-right: 8px;
+}
+.yn-row { display: flex; gap: 8px; }
+.yn-btn {
+  padding: 5px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.12em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.yn-btn:hover:not(.sel-yes):not(.sel-no) {
+  border-color: rgba(255,255,255,0.28);
+  color: var(--text);
+}
+.yn-btn.sel-yes {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+.yn-btn.sel-no {
+  background: var(--red-dim);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* Ruling */
+.ruling-zone { padding: 0 0 4px; }
+.ruling-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  text-align: center;
+  margin-bottom: 14px;
+}
+.ruling-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.btn-rule {
+  padding: 16px 12px;
+  border-radius: 10px;
+  border: 2px solid;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  line-height: 1;
+}
+.btn-admit {
+  background: var(--green-dim);
+  border-color: var(--green);
+  color: var(--green);
+}
+.btn-admit:not(:disabled):hover {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(42,157,143,0.35);
+  transform: translateY(-2px);
+}
+.btn-dismiss {
+  background: var(--red-dim);
+  border-color: var(--red);
+  color: var(--red);
+}
+.btn-dismiss:not(:disabled):hover {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(230,57,70,0.35);
+  transform: translateY(-2px);
+}
+.btn-rule:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+.ruling-hint {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 11px;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-style: italic;
+}
+
+/* ===== VERDICT SCREEN ===== */
+#screen-verdict {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+.verdict-hero {
+  text-align: center;
+  padding: 8px 0 32px;
+}
+.verdict-hero-icon {
+  font-size: 52px;
+  display: block;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 0 20px rgba(201,168,76,0.4));
+}
+.verdict-hero h1 {
+  font-size: 26px;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  margin-bottom: 22px;
+}
+.score-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  background: var(--card2);
+  border: 1px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 12px 28px;
+  margin-bottom: 10px;
+}
+.score-n {
+  font-size: 64px;
+  color: var(--gold);
+  line-height: 1;
+  font-weight: bold;
+}
+.score-d { font-size: 32px; color: var(--muted); }
+.score-rank {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  margin-top: 6px;
+}
+
+.verdict-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 20px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+.verdict-divider::before,
+.verdict-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--gold-border);
+}
+
+.vcard {
+  background: var(--card);
+  border: 1px solid;
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: transform 0.2s;
+}
+.vcard:hover { transform: translateX(3px); }
+.vcard.vright {
+  border-color: rgba(42,157,143,0.35);
+  background: linear-gradient(120deg, var(--card), rgba(42,157,143,0.04));
+}
+.vcard.vwrong {
+  border-color: rgba(230,57,70,0.35);
+  background: linear-gradient(120deg, var(--card), rgba(230,57,70,0.04));
+}
+.vstamp {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  margin-top: 2px;
+  font-weight: bold;
+}
+.vstamp.st-right { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+.vstamp.st-wrong { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+
+.vcard-body { flex: 1; min-width: 0; }
+.vcard-title {
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 7px;
+  line-height: 1.35;
+}
+.vcard-chips {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 9px;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-weight: bold;
+}
+.chip-your-a { background: rgba(42,157,143,0.18); color: var(--green); }
+.chip-your-d { background: rgba(230,57,70,0.18); color: var(--red); }
+.chip-exp-a  { background: rgba(201,168,76,0.14); color: var(--gold); }
+.chip-exp-d  { background: rgba(201,168,76,0.14); color: var(--gold); }
+.vcard-explanation {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.55;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+.verdict-actions {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.btn-outline {
+  padding: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--gold-border);
+  background: transparent;
+  color: var(--gold);
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.btn-outline:hover { background: var(--gold-dim); border-color: var(--gold); }
+.btn-solid {
+  padding: 13px;
+  border-radius: 8px;
+  border: none;
+  background: var(--gold);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: bold;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+  letter-spacing: 0.05em;
+}
+.btn-solid:hover { background: var(--gold-bright); }
+
+/* ===== LEADERBOARD SCREEN ===== */
+#screen-leaderboard {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+.lb-hero {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.lb-hero-icon { font-size: 44px; display: block; margin-bottom: 12px; }
+.lb-title {
+  font-size: 24px;
+  color: var(--gold);
+  letter-spacing: 0.18em;
+  margin-bottom: 6px;
+}
+.lb-sub {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+.lb-table-wrap {
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+table.lb {
+  width: 100%;
+  border-collapse: collapse;
+}
+table.lb thead tr { background: var(--surface); }
+table.lb th {
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--gold-border);
+  font-weight: normal;
+}
+table.lb td {
+  padding: 11px 14px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  color: var(--text);
+}
+table.lb tbody tr:last-child td { border-bottom: none; }
+table.lb tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+.rank-gold   { color: #ffd700; font-size: 16px; }
+.rank-silver { color: #c0c0c0; font-size: 16px; }
+.rank-bronze { color: #cd7f32; font-size: 16px; }
+.rank-plain  { color: var(--muted); font-size: 12px; }
+.score-col   { color: var(--gold); font-weight: bold; font-size: 14px; }
+.score-perfect { color: var(--green) !important; }
+.date-col, .topic-col { color: var(--muted); font-size: 12px; }
+
+.lb-empty {
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+.lb-empty .lb-empty-icon { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.4; }
+.lb-empty p { font-size: 14px; line-height: 1.6; }
+
+.btn-back-wide {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  border: 1px solid var(--gold-border);
+  background: transparent;
+  color: var(--gold);
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+.btn-back-wide:hover { background: var(--gold-dim); border-color: var(--gold); }
+
+.btn-danger-sm {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(230,57,70,0.3);
+  background: transparent;
+  color: #a04048;
+  font-size: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+.btn-danger-sm:hover { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 500px) {
+  .ruling-btns { grid-template-columns: 1fr; }
+  .verdict-actions { grid-template-columns: 1fr; }
+  .score-n { font-size: 52px; }
+  table.lb th:nth-child(4),
+  table.lb td:nth-child(4) { display: none; }
+}
+@media (max-width: 360px) {
+  .topbar-logo { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== WELCOME ==================== -->
+<div id="screen-welcome" class="screen active">
+  <div class="emblem">
+    <span class="emblem-icon">⚖</span>
+    <h1 class="emblem-title">SOURCE COURT</h1>
+    <p class="emblem-sub">AP Research Edition</p>
+  </div>
+
+  <div class="welcome-card">
+    <h2>All Rise</h2>
+    <p class="welcome-intro">
+      You are the judge. Five sources stand before your court. Cross-examine each one,
+      then rule: <em>Admissible</em> or <em>Dismissed</em>. Your verdict determines
+      what counts as evidence.
+    </p>
+    <form id="welcome-form" autocomplete="off">
+      <div class="form-group">
+        <label for="inp-name">Your Name</label>
+        <input id="inp-name" type="text" placeholder="Enter your name" required maxlength="50">
+      </div>
+      <div class="form-group">
+        <label for="inp-topic">Your Research Question</label>
+        <input id="inp-topic" type="text" placeholder="What are you investigating?" required maxlength="120">
+      </div>
+      <button type="submit" class="btn-enter">⚖&nbsp; Enter the Court</button>
+    </form>
+  </div>
+
+  <div class="welcome-footer">
+    <button class="btn-ghost" onclick="goLeaderboard()">🏛 Hall of Judges</button>
+  </div>
+</div>
+
+<!-- ==================== SOURCE ==================== -->
+<div id="screen-source" class="screen">
+  <!-- injected by JS -->
+</div>
+
+<!-- ==================== VERDICT ==================== -->
+<div id="screen-verdict" class="screen">
+  <!-- injected by JS -->
+</div>
+
+<!-- ==================== LEADERBOARD ==================== -->
+<div id="screen-leaderboard" class="screen">
+  <!-- injected by JS -->
+</div>
+
+<script>
+/* =======================================================
+   DATA — Two complete source sets
+   ======================================================= */
+
+const EXHIBITS = ['A','B','C','D','E'];
+
+const SETS = [
+  {
+    topic: 'Climate Change',
+    sources: [
+      {
+        title: 'Climate Change 2023: Synthesis Report',
+        author: 'Intergovernmental Panel on Climate Change (IPCC)',
+        publication: 'IPCC / United Nations',
+        date: '2023',
+        type: 'Scientific Report',
+        excerpt: '"Human-induced climate change, including more frequent and intense extreme weather events, has caused widespread adverse impacts and related losses and damages to nature and people, beyond natural climate variability."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: true  },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: true  },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: false }
+        ],
+        ruling: 'admissible',
+        explanation: 'The IPCC synthesizes work from thousands of climate scientists worldwide. Expert authors, rigorous peer review, institutional accountability, and a 2023 date — this is exactly the kind of source AP Research demands.'
+      },
+      {
+        title: 'Why Clean Coal Is Still America\'s Energy Backbone',
+        author: 'James R. Whitfield, Director of Communications',
+        publication: 'AmericanEnergyForum.org',
+        date: '2022',
+        type: 'Industry Blog Post',
+        excerpt: '"New scrubbing technologies have reduced coal plant emissions by over 90%. Alarmist projections ignore these innovations. Coal remains a viable, patriotic energy solution for millions of American families."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: false },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: false },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: true  }
+        ],
+        ruling: 'dismissed',
+        explanation: 'A communications director for an energy lobbying site is not a scientific expert. The organization has a direct financial stake in coal\'s survival — a textbook conflict of interest. Recency alone cannot save a biased, unvetted source.'
+      },
+      {
+        title: 'Accelerating Arctic Sea Ice Loss and Its Amplifying Feedback Effects',
+        author: 'Dr. Sarah Chen & Dr. Marcus Webb, Oxford Climate Research Institute',
+        publication: 'Nature Climate Change (Peer-Reviewed)',
+        date: '2021',
+        type: 'Journal Article',
+        excerpt: '"Satellite observations from 1979–2020 document a 13.1% per-decade decline in Arctic sea ice extent, with statistically significant acceleration after 2007. Albedo feedback loops amplify warming at twice the global mean rate."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: true  },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: true  },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: false }
+        ],
+        ruling: 'admissible',
+        explanation: 'Nature Climate Change is one of the world\'s most rigorous peer-reviewed journals. Credentialed Oxford researchers, transparent methodology, 40+ years of satellite data, and no financial conflicts. Admissible.'
+      },
+      {
+        title: 'Climate Change — Wikipedia',
+        author: 'Multiple anonymous contributors',
+        publication: 'Wikipedia (en.wikipedia.org)',
+        date: 'Last edited 2024',
+        type: 'Crowd-Edited Encyclopedia',
+        excerpt: '"Climate change refers to long-term shifts in global temperatures and weather patterns. Since the mid-20th century, human activities — primarily burning fossil fuels — have been the main driver of climate change."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: false },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: false },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: false }
+        ],
+        ruling: 'dismissed',
+        explanation: 'Wikipedia has no named, credentialed authors and undergoes no peer review. It\'s valuable for orientation — not for evidence. AP Research requires traceable, accountable scholarship. Dismissed, but use it to find real sources.'
+      },
+      {
+        title: 'I Sailed the Northwest Passage. The Ice Is Gone.',
+        author: 'Tyler Cross, Actor & Environmental Activist',
+        publication: 'The New York Times (Opinion)',
+        date: '2023',
+        type: 'Newspaper Opinion Column',
+        excerpt: '"I\'ve made three Arctic crossings. The ice that once killed explorers is gone. No scientist needs to tell me what I saw with my own eyes. This is the defining crisis of our generation and we are sleepwalking through it."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: false },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: false },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: true  }
+        ],
+        ruling: 'dismissed',
+        explanation: 'Compelling first-person observation — but anecdote is not data. The author has no scientific credentials, the column underwent no peer review, and activist framing signals a one-sided perspective. Dismissed.'
+      }
+    ]
+  },
+  {
+    topic: 'Social Media & Mental Health',
+    sources: [
+      {
+        title: 'Social Media Use and Adolescent Mental Health: Findings From the UK Millennium Cohort',
+        author: 'Dr. Amy Orben & Dr. Andrew Przybylski, Oxford Internet Institute',
+        publication: 'The Lancet Child & Adolescent Health (Peer-Reviewed)',
+        date: '2022',
+        type: 'Journal Article',
+        excerpt: '"Social media use accounted for less than 0.4% of variance in adolescent well-being — an effect smaller than wearing glasses or eating potatoes. The association, while real, is far weaker than popular discourse suggests."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: true  },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: true  },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: false }
+        ],
+        ruling: 'admissible',
+        explanation: 'Oxford-based researchers published in The Lancet — a top-tier peer-reviewed medical journal. Large dataset, transparent methodology, and findings that challenge popular assumptions. This is exactly the scholarly rigor AP Research demands.'
+      },
+      {
+        title: 'I Deleted Instagram for 30 Days and This Happened to My Anxiety',
+        author: '@WellnessWithMia (Mia Torres, Lifestyle Influencer)',
+        publication: 'Personal Blog / Instagram Stories',
+        date: '2023',
+        type: 'Personal Blog / Social Media',
+        excerpt: '"Day 30. No Instagram, no doom-scrolling. My anxiety is completely gone, my sleep is incredible, I feel like myself again. This is the cure no one is talking about. DM me for my full wellness guide. Link in bio."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: false },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: false },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: true  }
+        ],
+        ruling: 'dismissed',
+        explanation: 'A personal diary entry from someone with no psychological training — and a commercial interest in wellness content. One person\'s 30-day experiment cannot substitute for controlled research. Dismissed.'
+      },
+      {
+        title: 'Health Advisory on Social Media Use in Adolescence',
+        author: 'American Psychological Association (APA)',
+        publication: 'American Psychological Association',
+        date: '2023',
+        type: 'Professional Health Advisory',
+        excerpt: '"Adolescents who spend more than 3 hours daily on social media face double the risk of depression and anxiety symptoms. The APA recommends structured safeguards, age-appropriate design standards, and parental digital literacy."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: true  },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: true  },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: false }
+        ],
+        ruling: 'admissible',
+        explanation: 'The APA is the leading professional psychology organization in the U.S. Their health advisories synthesize large bodies of peer-reviewed research. Credentialed, current, and rigorously evidence-based. Admissible.'
+      },
+      {
+        title: 'Teens Are Depressed. Is Social Media to Blame?',
+        author: 'Sarah Mervosh, Education Reporter',
+        publication: 'The New York Times (News)',
+        date: '2023',
+        type: 'Newspaper Article',
+        excerpt: '"Researchers disagree sharply. \'We have correlation, not causation,\' said Dr. Candice Odgers of UC Irvine. Others say the data is clear. The debate has real stakes as lawmakers draft legislation to restrict teen phone use."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: false },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: false },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: false }
+        ],
+        ruling: 'dismissed',
+        explanation: 'Quality journalism — but journalism is not scholarship. The reporter accurately summarizes the debate but is not a researcher. For AP Research, cite the scientists quoted in this article, not the article about them. Dismissed.'
+      },
+      {
+        title: 'Social Media and Youth Mental Health: The U.S. Surgeon General\'s Advisory',
+        author: 'Dr. Vivek Murthy, U.S. Surgeon General',
+        publication: 'U.S. Dept. of Health and Human Services',
+        date: '2023',
+        type: 'Government Health Advisory',
+        excerpt: '"While social media can offer benefits, there is growing evidence of significant harms to young people\'s mental health. Adolescents lack the developmental maturity to navigate these platforms without structured guidance from adults."',
+        questions: [
+          { text: 'Is the author or organization an expert in this field?',              expert: true  },
+          { text: 'Is this source recent — published within the last 5–7 years?',        expert: true  },
+          { text: 'Is it peer-reviewed or from a highly reputable institution?',         expert: true  },
+          { text: 'Does the source show significant bias or a potential hidden agenda?', expert: false }
+        ],
+        ruling: 'admissible',
+        explanation: 'The U.S. Surgeon General is the nation\'s top public health authority. This advisory is grounded in systematic review of the scientific literature and carries significant institutional weight. Admissible.'
+      }
+    ]
+  }
+];
+
+/* =======================================================
+   STATE
+   ======================================================= */
+
+const S = {
+  name:        '',
+  topic:       '',
+  setIdx:      0,
+  srcIdx:      0,
+  qAnswers:    [],   // 5 × 4 of null/true/false
+  rulings:     [],   // array of 'admissible'/'dismissed'
+  lastSetIdx:  -1,   // for variety when replaying
+};
+
+/* =======================================================
+   SCREEN ROUTING
+   ======================================================= */
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* =======================================================
+   WELCOME
+   ======================================================= */
+
+document.getElementById('welcome-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name  = document.getElementById('inp-name').value.trim();
+  const topic = document.getElementById('inp-topic').value.trim();
+  if (!name || !topic) return;
+
+  S.name  = name;
+  S.topic = topic;
+
+  // Pick a set — prefer the other one from last session for variety
+  if (S.lastSetIdx === 0)       S.setIdx = 1;
+  else if (S.lastSetIdx === 1)  S.setIdx = 0;
+  else                          S.setIdx = Math.random() < 0.5 ? 0 : 1;
+
+  S.srcIdx   = 0;
+  S.rulings  = [];
+  S.qAnswers = Array.from({ length: 5 }, () => [null, null, null, null]);
+
+  renderSource(0);
+  showScreen('source');
+});
+
+function goLeaderboard() {
+  renderLeaderboard();
+  showScreen('leaderboard');
+}
+
+/* =======================================================
+   SOURCE SCREEN
+   ======================================================= */
+
+function renderSource(idx) {
+  const set    = SETS[S.setIdx];
+  const src    = set.sources[idx];
+  const ex     = EXHIBITS[idx];
+  const total  = set.sources.length;
+  const ans    = S.qAnswers[idx];
+  const done   = ans.every(a => a !== null);
+  const pct    = Math.round(((idx + 1) / total) * 100);
+
+  const qsHTML = src.questions.map((q, qi) => {
+    const a = ans[qi];
+    const yc = a === true  ? 'yn-btn sel-yes' : 'yn-btn';
+    const nc = a === false ? 'yn-btn sel-no'  : 'yn-btn';
+    return `
+      <div class="q-row">
+        <div class="q-text">${q.text}</div>
+        <div class="yn-row">
+          <button class="${yc}" onclick="answerQ(${idx},${qi},true)">YES</button>
+          <button class="${nc}" onclick="answerQ(${idx},${qi},false)">NO</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  const dis  = done ? '' : 'disabled';
+  const hint = done ? '' : `<div class="ruling-hint">Answer all four questions to unlock your ruling</div>`;
+
+  document.getElementById('screen-source').innerHTML = `
+    <div class="topbar">
+      <span class="topbar-logo">⚖ SOURCE COURT</span>
+      <div class="topbar-right">
+        <span class="topbar-progress">Case ${idx + 1} of ${total} &middot; ${set.topic}</span>
+      </div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" style="width:${pct}%"></div>
+    </div>
+
+    <div class="source-body">
+      <div class="case-badge-row">
+        <span class="exhibit-tag">Exhibit ${ex}</span>
+        <span class="type-badge">${src.type}</span>
+      </div>
+
+      <div class="case-file">
+        <div class="case-file-top">
+          <h2 class="source-title">${src.title}</h2>
+          <div class="meta-grid">
+            <span class="meta-k">Author</span>
+            <span class="meta-v">${src.author}</span>
+            <span class="meta-k">Published In</span>
+            <span class="meta-v">${src.publication}</span>
+            <span class="meta-k">Date</span>
+            <span class="meta-v">${src.date}</span>
+          </div>
+        </div>
+        <div class="excerpt-area">
+          <span class="excerpt-kicker">Excerpt</span>
+          <p class="excerpt-quote">${src.excerpt}</p>
+        </div>
+      </div>
+
+      <div class="cross-exam">
+        <div class="cross-exam-title">Cross-Examination</div>
+        ${qsHTML}
+      </div>
+
+      <div class="ruling-zone">
+        <div class="ruling-label">Your Ruling</div>
+        <div class="ruling-btns">
+          <button class="btn-rule btn-admit" ${dis} onclick="submitRuling('admissible')">
+            ✓ Admissible
+          </button>
+          <button class="btn-rule btn-dismiss" ${dis} onclick="submitRuling('dismissed')">
+            ✗ Dismissed
+          </button>
+        </div>
+        ${hint}
+      </div>
+    </div>`;
+}
+
+function answerQ(srcIdx, qIdx, val) {
+  S.qAnswers[srcIdx][qIdx] = val;
+  renderSource(srcIdx);
+}
+
+function submitRuling(ruling) {
+  S.rulings.push(ruling);
+  const next = S.srcIdx + 1;
+  if (next < SETS[S.setIdx].sources.length) {
+    S.srcIdx = next;
+    renderSource(next);
+    window.scrollTo(0, 0);
+  } else {
+    const score = calcScore();
+    S.lastSetIdx = S.setIdx;
+    saveScore(S.name, S.topic, score, SETS[S.setIdx].topic);
+    renderVerdict(score);
+    showScreen('verdict');
+  }
+}
+
+/* =======================================================
+   SCORING
+   ======================================================= */
+
+function calcScore() {
+  return SETS[S.setIdx].sources.reduce(
+    (acc, src, i) => acc + (S.rulings[i] === src.ruling ? 1 : 0), 0
+  );
+}
+
+/* =======================================================
+   VERDICT SCREEN
+   ======================================================= */
+
+const RANKS = ['Back to Law School', 'Needs More Evidence', 'Promising Bench', 'Sharp Judicial Eye', 'Perfect Record'];
+
+function renderVerdict(score) {
+  const set   = SETS[S.setIdx];
+  const total = set.sources.length;
+  const rank  = RANKS[score] || RANKS[0];
+
+  const cards = set.sources.map((src, i) => {
+    const correct     = S.rulings[i] === src.ruling;
+    const yourRuling  = S.rulings[i];
+    const yourChip    = yourRuling === 'admissible' ? 'chip chip-your-a' : 'chip chip-your-d';
+    const expChip     = src.ruling  === 'admissible' ? 'chip chip-exp-a'  : 'chip chip-exp-d';
+    return `
+      <div class="vcard ${correct ? 'vright' : 'vwrong'}">
+        <div class="vstamp ${correct ? 'st-right' : 'st-wrong'}">${correct ? '✓' : '✗'}</div>
+        <div class="vcard-body">
+          <div class="vcard-title">${src.title}</div>
+          <div class="vcard-chips">
+            <span class="${yourChip}">You: ${yourRuling}</span>
+            <span class="${expChip}">Expert: ${src.ruling}</span>
+          </div>
+          <div class="vcard-explanation">${src.explanation}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('screen-verdict').innerHTML = `
+    <div class="verdict-hero">
+      <span class="verdict-hero-icon">⚖</span>
+      <h1>COURT ADJOURNED</h1>
+      <div class="score-wrap">
+        <span class="score-n">${score}</span>
+        <span class="score-d">/${total}</span>
+      </div>
+      <div class="score-rank">${rank} &middot; Judge ${S.name}</div>
+    </div>
+
+    <div class="verdict-divider">Case Summary</div>
+
+    <div id="verdict-cards">${cards}</div>
+
+    <div class="verdict-actions">
+      <button class="btn-outline" onclick="playAgain()">Try Another Case</button>
+      <button class="btn-solid"   onclick="goLeaderboard()">Hall of Judges</button>
+    </div>`;
+}
+
+function playAgain() {
+  const saved = S.name;
+  S.srcIdx   = 0;
+  S.rulings  = [];
+  S.qAnswers = [];
+  document.getElementById('inp-name').value  = saved;
+  document.getElementById('inp-topic').value = '';
+  showScreen('welcome');
+}
+
+/* =======================================================
+   LEADERBOARD
+   ======================================================= */
+
+const LB_KEY = 'sourcecourt_v1_lb';
+
+function saveScore(name, topic, score, setTopic) {
+  const lb = loadLB();
+  lb.push({
+    name,
+    topic,
+    score,
+    setTopic,
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  });
+  lb.sort((a, b) => b.score - a.score || 0);
+  try { localStorage.setItem(LB_KEY, JSON.stringify(lb.slice(0, 100))); } catch(e) {}
+}
+
+function loadLB() {
+  try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; }
+  catch { return []; }
+}
+
+function clearLB() {
+  if (!confirm('Clear the entire Hall of Judges? This cannot be undone.')) return;
+  try { localStorage.removeItem(LB_KEY); } catch(e) {}
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const entries = loadLB();
+  let body = '';
+
+  if (entries.length === 0) {
+    body = `
+      <tr><td colspan="5">
+        <div class="lb-empty">
+          <span class="lb-empty-icon">⚖</span>
+          <p>No rulings on record yet.<br>Be the first judge to enter the court.</p>
+        </div>
+      </td></tr>`;
+  } else {
+    body = entries.map((e, i) => {
+      const rank = i + 1;
+      const rankEl = rank === 1 ? `<span class="rank-gold">🥇</span>`
+                   : rank === 2 ? `<span class="rank-silver">🥈</span>`
+                   : rank === 3 ? `<span class="rank-bronze">🥉</span>`
+                   : `<span class="rank-plain">#${rank}</span>`;
+      const sc    = e.score === 5
+        ? `<span class="score-col score-perfect">${e.score}/5 ★</span>`
+        : `<span class="score-col">${e.score}/5</span>`;
+      const nm    = e.name.length > 20 ? e.name.slice(0,18) + '…' : e.name;
+      const tp    = (e.setTopic || '').length > 22 ? (e.setTopic||'').slice(0,20)+'…' : (e.setTopic||'');
+      return `<tr>
+        <td>${rankEl}</td>
+        <td>${nm}</td>
+        <td>${sc}</td>
+        <td class="topic-col">${tp}</td>
+        <td class="date-col">${e.date}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('screen-leaderboard').innerHTML = `
+    <div class="lb-hero">
+      <span class="lb-hero-icon">🏛</span>
+      <h1 class="lb-title">HALL OF JUDGES</h1>
+      <p class="lb-sub">Historical Record of Court Proceedings</p>
+    </div>
+
+    <div class="lb-table-wrap">
+      <table class="lb">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Judge</th>
+            <th>Score</th>
+            <th>Topic</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>${body}</tbody>
+      </table>
+    </div>
+
+    <button class="btn-back-wide" onclick="showScreen('welcome')">← Return to Court</button>
+    ${entries.length > 0
+      ? `<button class="btn-danger-sm" onclick="clearLB()">Clear All Records</button>`
+      : ''}
+  `;
+}
+</script>
+</body>
+</html>
