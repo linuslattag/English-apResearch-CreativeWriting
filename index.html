@@ -154,6 +154,12 @@
   .app-card.roast:hover .app-title { color: var(--orange); }
   .app-card.roast:hover .app-badge { background: rgba(251, 146, 60, 0.15); color: var(--orange); }
 
+   /* Line of Reasoning Detective (Yellow) */
+  .app-card.roast:hover { border-color: var(--yellow); box-shadow: 0 10px 40px rgba(251, 146, 60, 0.2); }
+  .app-card.roast:hover::before { background: var(--yellow); }
+  .app-card.roast:hover .app-title { color: var(--yellow); }
+  .app-card.roast:hover .app-badge { background: rgba(251, 146, 60, 0.15); color: var(--yellow); }
+
   @media (max-width: 600px) {
     .app-grid { grid-template-columns: 1fr; }
   }
