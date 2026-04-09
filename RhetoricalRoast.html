@@ -1,0 +1,942 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhetorical Roast: Smash Edition</title>
+  
+  <!-- Load React, ReactDOM, and Babel to run the game directly in the browser -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Load Tailwind CSS for all the styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom CSS for Smash Bros hit animations and text outlines -->
+  <style>
+    @keyframes screenShake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(6px, 6px) rotate(1deg); }
+      50% { transform: translate(-6px, -6px) rotate(-1deg); }
+      75% { transform: translate(6px, -6px) rotate(1deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+    .animate-shake {
+      animation: screenShake 0.3s ease-in-out infinite;
+    }
+    .smash-text-stroke {
+      -webkit-text-stroke: 1.5px black;
+      text-shadow: 2px 2px 0px black, 0px 0px 8px rgba(0,0,0,0.8);
+    }
+    .speech-bubble-tail {
+      position: absolute;
+      bottom: -20px;
+      right: 40px;
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 20px solid white;
+    }
+    body {
+      background-color: black;
+      margin: 0;
+      overflow-x: hidden;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- INLINE SVG ICONS (Replaces lucide-react imports) ---
+    const Icon = ({ children, className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        {children}
+      </svg>
+    );
+    const Shield = ({className}) => <Icon className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></Icon>;
+    const Zap = ({className}) => <Icon className={className}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></Icon>;
+    const BookOpen = ({className}) => <Icon className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
+    const Target = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></Icon>;
+    const Flame = ({className}) => <Icon className={className}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></Icon>;
+    const Trophy = ({className}) => <Icon className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"/></Icon>;
+    const AlertCircle = ({className}) => <Icon className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></Icon>;
+    const Skull = ({className}) => <Icon className={className}><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2"/><path d="m12.5 17-.5-1-.5 1h1z"/><path d="M16 20a2 2 0 0 0 1.56-3.25 8 8 0 1 0-11.12 0A2 2 0 0 0 8 20"/></Icon>;
+    const PenTool = ({className}) => <Icon className={className}><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></Icon>;
+
+    // --- MEAN HUMAN VILLAIN SVGS ---
+
+    const AngryBullySVG = () => (
+      <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_10px_20px_rgba(220,38,38,0.4)]">
+        <path d="M 40 200 L 50 110 Q 100 80 150 110 L 160 200 Z" fill="#1f2937" stroke="#111827" strokeWidth="4"/>
+        <path d="M 70 200 L 70 120 Q 100 100 130 120 L 130 200 Z" fill="#dc2626" />
+        <path d="M 100 120 L 100 200" stroke="#b91c1c" strokeWidth="4" />
+        <circle cx="100" cy="70" r="35" fill="#fca5a5" stroke="#991b1b" strokeWidth="2"/>
+        <path d="M 65 50 L 70 20 L 85 35 L 100 10 L 115 35 L 130 20 L 135 50 Z" fill="#450a0a" stroke="#270606" strokeWidth="2"/>
+        <path d="M 70 60 L 95 65" stroke="#450a0a" strokeWidth="5" strokeLinecap="round"/>
+        <path d="M 130 60 L 105 65" stroke="#450a0a" strokeWidth="5" strokeLinecap="round"/>
+        <circle cx="85" cy="70" r="4" fill="white" />
+        <circle cx="115" cy="70" r="4" fill="white" />
+        <circle cx="85" cy="70" r="2" fill="black"/>
+        <circle cx="115" cy="70" r="2" fill="black"/>
+        <path d="M 80 85 Q 100 110 120 85 Z" fill="#450a0a" stroke="#7f1d1d" strokeWidth="2"/>
+        <path d="M 85 87 L 115 87 L 110 93 L 90 93 Z" fill="white"/>
+        <circle cx="50" cy="150" r="20" fill="#fca5a5" stroke="#991b1b" strokeWidth="2"/>
+        <line x1="40" y1="140" x2="60" y2="140" stroke="#991b1b" strokeWidth="2"/>
+        <line x1="40" y1="150" x2="60" y2="150" stroke="#991b1b" strokeWidth="2"/>
+      </svg>
+    );
+
+    const MeanTeacherSVG = () => (
+      <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_10px_20px_rgba(251,191,36,0.4)]">
+        <rect x="60" y="100" width="80" height="100" fill="#78350f" stroke="#450a0a" strokeWidth="3" rx="10"/>
+        <path d="M 85 100 L 115 100 L 100 120 Z" fill="white" />
+        <path d="M 95 110 L 105 110 L 100 160 Z" fill="#14532d" />
+        <ellipse cx="100" cy="65" rx="28" ry="40" fill="#fed7aa" stroke="#c2410c" strokeWidth="2"/>
+        <path d="M 72 65 Q 65 40 100 25 Q 135 40 128 65" fill="none" stroke="#6b7280" strokeWidth="12" strokeLinecap="round"/>
+        <path d="M 75 55 L 95 65 L 75 65 Z" fill="rgba(255,255,255,0.8)" stroke="#111827" strokeWidth="2"/>
+        <path d="M 125 55 L 105 65 L 125 65 Z" fill="rgba(255,255,255,0.8)" stroke="#111827" strokeWidth="2"/>
+        <line x1="95" y1="60" x2="105" y2="60" stroke="#111827" strokeWidth="2"/>
+        <circle cx="85" cy="62" r="2" fill="black"/>
+        <circle cx="115" cy="62" r="2" fill="black"/>
+        <path d="M 85 85 Q 100 75 115 85" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round"/>
+        <rect x="130" y="90" width="60" height="8" fill="#fbbf24" stroke="#d97706" strokeWidth="1" transform="rotate(-30 130 90)"/>
+        <circle cx="135" cy="95" r="12" fill="#fed7aa" stroke="#c2410c" strokeWidth="2"/>
+      </svg>
+    );
+
+    const SnootyAristocratSVG = () => (
+      <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_10px_20px_rgba(209,213,219,0.4)]">
+        <path d="M 50 200 L 60 120 Q 100 100 140 120 L 150 200 Z" fill="#312e81" stroke="#1e1b4b" strokeWidth="4"/>
+        <path d="M 80 120 L 120 120 L 100 200 Z" fill="white" />
+        <path d="M 85 130 L 115 130 L 100 150 Z" fill="#dc2626" />
+        <circle cx="100" cy="70" r="32" fill="#ffedd5" stroke="#ea580c" strokeWidth="2"/>
+        <path d="M 65 70 Q 75 30 110 40 Q 130 50 135 70 Q 100 20 65 70" fill="#111827"/>
+        <path d="M 75 55 Q 85 50 95 60" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M 125 55 Q 115 50 105 60" fill="none" stroke="#111827" strokeWidth="3" strokeLinecap="round"/>
+        <line x1="80" y1="62" x2="90" y2="62" stroke="#111827" strokeWidth="2"/>
+        <circle cx="85" cy="60" r="2" fill="black"/>
+        <circle cx="115" cy="62" r="10" fill="rgba(255,255,255,0.6)" stroke="#fbbf24" strokeWidth="3"/>
+        <circle cx="115" cy="62" r="2" fill="black"/>
+        <line x1="125" y1="62" x2="135" y2="90" stroke="#fbbf24" strokeWidth="2"/>
+        <path d="M 95 72 L 105 70 L 100 78 Z" fill="#fdba74"/>
+        <path d="M 85 85 Q 100 80 115 85" fill="none" stroke="#111827" strokeWidth="4" strokeLinecap="round"/>
+        <path d="M 90 88 Q 100 85 110 88" fill="none" stroke="#7f1d1d" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    );
+
+    const BossMastermindSVG = () => (
+      <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_0_30px_rgba(220,38,38,0.6)]">
+        <path d="M 20 200 L 30 110 Q 100 70 170 110 L 180 200 Z" fill="#111827" stroke="#000" strokeWidth="4"/>
+        <path d="M 85 100 L 115 100 L 100 190 Z" fill="#991b1b" />
+        <line x1="85" y1="100" x2="100" y2="120" stroke="#111827" strokeWidth="4"/>
+        <line x1="115" y1="100" x2="100" y2="120" stroke="#111827" strokeWidth="4"/>
+        <ellipse cx="100" cy="60" rx="30" ry="42" fill="#e5e7eb" stroke="#374151" strokeWidth="2"/>
+        <path d="M 70 60 Q 90 10 130 40 Q 140 20 100 10 Q 60 20 70 60" fill="#030712"/>
+        <path d="M 75 50 L 95 55" stroke="#111827" strokeWidth="6" strokeLinecap="round"/>
+        <path d="M 125 50 L 105 55" stroke="#111827" strokeWidth="6" strokeLinecap="round"/>
+        <circle cx="85" cy="60" r="4" fill="#ef4444" className="animate-pulse" />
+        <circle cx="115" cy="60" r="4" fill="#ef4444" className="animate-pulse" />
+        <path d="M 80 80 Q 100 95 120 80 Z" fill="white" stroke="#111827" strokeWidth="2"/>
+        <line x1="85" y1="83" x2="115" y2="83" stroke="#111827" strokeWidth="1"/>
+        <path d="M 60 160 L 95 135 L 100 145 L 70 170 Z" fill="#e5e7eb" stroke="#374151" strokeWidth="2"/>
+        <path d="M 140 160 L 105 135 L 100 145 L 130 170 Z" fill="#e5e7eb" stroke="#374151" strokeWidth="2"/>
+        <path d="M 75 170 L 98 142 L 100 152 L 80 180 Z" fill="#d1d5db" stroke="#374151" strokeWidth="2"/>
+        <path d="M 125 170 L 102 142 L 100 152 L 120 180 Z" fill="#d1d5db" stroke="#374151" strokeWidth="2"/>
+      </svg>
+    );
+
+    // --- PROCEDURAL GENERATION ENGINE (Infinite Variations) ---
+    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+    const generateTier1 = () => {
+      const types = ['Metaphor', 'Simile', 'Personification', 'Hyperbole'];
+      const a = pick(types);
+      let q = "";
+      
+      if (a === 'Metaphor') {
+        q = `"${pick(['My logic', 'Your thesis', 'This debate', 'My counter-argument'])} is a ${pick(['wrecking ball', 'sinking ship', 'broken compass', 'dark maze'])}!" Which device am I using?`;
+      } else if (a === 'Simile') {
+        q = `"${pick(['Your logic', 'Your essay', 'This argument'])} is like a ${pick(['fragile house of cards', 'lost puppy', 'dull knife'])}!" Identify my weapon.`;
+      } else if (a === 'Personification') {
+        q = `"${pick(['The timer', 'Your essay', 'The podium', 'The silence'])} is ${pick(['laughing at', 'screaming at', 'mocking', 'weeping for'])} ${pick(['your mistakes', 'your failure', 'you'])}!" Name the device.`;
+      } else {
+        q = `"I have ${pick(['defeated', 'graded', 'destroyed', 'crushed'])} a ${pick(['billion', 'trillion', 'million'])} ${pick(['debaters', 'essays', 'opponents'])} today!" What is this?`;
+      }
+
+      let opts = [a, ...shuffle(types.filter(t => t !== a)).slice(0, 3)];
+      return { q, opts: shuffle(opts), a };
+    };
+
+    const generateTier2 = () => {
+      const types = ['Anaphora', 'Polysyndeton', 'Asyndeton', 'Antithesis', 'Epistrophe'];
+      const a = pick(types);
+      let q = "";
+
+      if (a === 'Anaphora') {
+        const p = pick(['We demand', 'I will find', 'You lack']);
+        q = `"${p} ${pick(['focus', 'evidence', 'logic'])}, ${p} ${pick(['structure', 'grammar', 'style'])}, ${p} ${pick(['victory', 'perfection', 'effort'])}!" Counter my syntax!`;
+      } else if (a === 'Polysyndeton') {
+        q = `"You need ${pick(['quotes', 'commas', 'claims'])} and ${pick(['warrants', 'reasoning', 'pathos'])} and ${pick(['ethos', 'logos', 'courage'])} to win!" What creates this rhythm?`;
+      } else if (a === 'Asyndeton') {
+        q = `"${pick(['I read, I analyzed, I won.', 'No thesis, no quotes, no hope.', 'Fast, brutal, effective, flawless.'])}" Name the rapid-fire device!`;
+      } else if (a === 'Antithesis') {
+        q = `"${pick(['You speak with ', 'Your essay shows '])}${pick(['ignorance', 'chaos', 'weakness'])}, ${pick(['but I speak with ', 'while mine shows '])}${pick(['brilliance', 'order', 'strength'])}." Name this move.`;
+      } else {
+        q = `"You hate ${pick(['reading', 'grammar', 'logic'])}, we love ${pick(['reading', 'grammar', 'logic'])}, they need ${pick(['reading', 'grammar', 'logic'])}." What device repeats at the end?`;
+      }
+
+      let opts = [a, ...shuffle(types.filter(t => t !== a)).slice(0, 3)];
+      return { q, opts: shuffle(opts), a };
+    };
+
+    const generateTier3 = () => {
+      const types = ['Satire', 'Irony', 'Tone Shift', 'Juxtaposition', 'Syllogism'];
+      const a = pick(types);
+      let q = "";
+
+      if (a === 'Satire') {
+        q = `"I formally propose we solve ${pick(['traffic', 'poverty', 'bad grades'])} by simply ${pick(['banning all cars', 'feeding the poor to lions', 'deleting all schools'])}!" What is my tactic?`;
+      } else if (a === 'Irony') {
+        q = `"The ${pick(['grammar teacher', 'fire chief', 'debate champion'])} completely ${pick(['misspelled their own name', 'burned their house down', 'forgot how to speak'])}!" This exemplifies...`;
+      } else if (a === 'Tone Shift') {
+        q = `"I was ${pick(['weeping at', 'bored by', 'asleep during'])} your intro, but now I am ${pick(['enraged by', 'laughing at', 'terrified of'])} your conclusion!" This is a...`;
+      } else if (a === 'Juxtaposition') {
+        q = `"Look at this ${pick(['golden crown', 'blooming rose', 'diamond ring'])} placed directly next to a ${pick(['pile of garbage', 'rusted tank', 'broken desk'])}." This creates:`;
+      } else {
+        const x = pick(['fools', 'losers', 'amateurs']);
+        const y = pick(['fail', 'cry', 'lose']);
+        q = `"All ${x} ${y}. You are a ${x.slice(0,-1)}. Therefore, you ${y}." Name the logical progression.`;
+      }
+
+      let opts = [a, ...shuffle(types.filter(t => t !== a)).slice(0, 3)];
+      return { q, opts: shuffle(opts), a };
+    };
+
+    // --- PROCEDURAL BOSS GENERATOR ---
+    const BOSS_TOPICS = [
+      "social media", "standardized testing", "video games", "fast food", 
+      "artificial intelligence", "waking up early", "school uniforms", 
+      "reading fiction", "learning math", "drinking coffee"
+    ];
+
+    const FALLACIES_DICT = {
+      'Ad Hominem': (t) => `Anyone who supports ${t} is clearly just an uneducated fool with no moral compass.`,
+      'Slippery Slope': (t) => `If we don't ban ${t} today, tomorrow the economy will shatter, and civilization will burn to the ground!`,
+      'Bandwagon': (t) => `Literally millions of people on the internet agree that ${t} is dangerous, so it must be an absolute fact.`,
+      'Anecdotal Fallacy': (t) => `My cousin's neighbor tried ${t} once, and the very next day he broke his leg, proving how toxic it is.`,
+      'Circular Reasoning': (t) => `We must restrict ${t} entirely because it is something that obviously needs to be restricted.`,
+      'False Dichotomy': (t) => `Either we completely eradicate ${t}, or we all accept our doom. There is no middle ground!`,
+      'Red Herring': (t) => `People worry about the effects of ${t}, but what about the fact that penguins sleep with one eye open? We should focus on that!`,
+      'Straw Man': (t) => `Supporters of ${t} literally want to destroy our children's future and watch them suffer!`,
+      'Appeal to Authority': (t) => `My local dentist told me that ${t} is the leading cause of global warming, and he has a degree.`,
+      'Post Hoc': (t) => `Ever since ${t} became popular, the weather has gotten worse. Coincidence? I think not.`
+    };
+
+    const PROMPT_TYPES = [
+      "Construct a counter-sentence using PARALLELISM! (Use conjunctions or semicolons)",
+      "Construct a counter-argument using ANTITHESIS! (Use 'but', 'yet', or 'however')",
+      "Construct a rapid-fire counter-argument using ASYNDETON! (NO conjunctions allowed!)",
+      "Construct a highly repetitive counter-sentence using POLYSYNDETON! (Use 'and'/'or' multiple times)",
+      "Construct a deeply sarcastic counter-argument demonstrating IRONY!",
+      "Construct a counter-argument that ends with a powerful RHETORICAL QUESTION!"
+    ];
+
+    const generateBossPassage = (playerId) => {
+      const topic = pick(BOSS_TOPICS);
+      const allKeys = Object.keys(FALLACIES_DICT);
+      const shuffledKeys = shuffle(allKeys);
+      
+      const correctCount = playerId === 'researcher' ? 2 : 3;
+      const trueFlaws = shuffledKeys.slice(0, correctCount);
+      const falseFlaws = shuffledKeys.slice(correctCount, correctCount + 2); 
+      
+      const intro = pick(["The debate has gone on long enough.", "Let me tell you the absolute truth.", "It is time to wake up and see reality.", "You cannot possibly win this argument."]);
+      const outro = pick(["Therefore, my logic is undeniably flawless.", "Only a complete fool would disagree with me.", "I rest my perfect case.", "Any rational person must accept this."]);
+      
+      let passageSentences = shuffle(trueFlaws.map(k => FALLACIES_DICT[k](topic)));
+      const fullPassage = `${intro} ${passageSentences.join(" ")} ${outro}`;
+
+      let flawsOptions = [];
+      trueFlaws.forEach(k => flawsOptions.push({ id: k, text: k, isCorrect: true }));
+      falseFlaws.forEach(k => flawsOptions.push({ id: k, text: k, isCorrect: false }));
+
+      return {
+        title: 'The Mastermind',
+        passage: fullPassage,
+        flaws: shuffle(flawsOptions),
+        correctCount: correctCount,
+        prompt: pick(PROMPT_TYPES)
+      };
+    };
+
+    const CHARACTERS = [
+      { id: 'orator', name: 'The Orator', icon: Shield, color: 'text-blue-400', passive: 'Ethos Shield', desc: 'Blocks the first wrong answer penalty.' },
+      { id: 'researcher', name: 'The Researcher', icon: BookOpen, color: 'text-green-400', passive: 'Flaw Finder', desc: 'The Boss only requires 2 logical flaws to be identified.' },
+      { id: 'archer', name: 'Arg. Archer', icon: Target, color: 'text-purple-400', passive: 'Piercing Thesis', desc: 'Halves the time penalty on high %.' },
+      { id: 'summoner', name: 'Syn. Summoner', icon: Zap, color: 'text-yellow-400', passive: 'Citations', desc: 'Heals 15% after clearing a level.' }
+    ];
+
+    const FICTIONAL_LEADERBOARD = [
+      { name: 'AP_Scholar_99', time: '1:42', percent: '40%' },
+      { name: 'Thesis_Rex', time: '2:05', percent: '65%' },
+      { name: 'Rhetoric_God', time: '2:15', percent: '80%' },
+      { name: 'Syntax_Error', time: '2:50', percent: '120%' }, 
+      { name: 'CollegeBoardFan', time: '3:10', percent: '150%' },
+    ];
+
+    const LEVELS_INFO = [
+      { level: 1, opponent: 'Loudmouth Larry', svg: AngryBullySVG },
+      { level: 2, opponent: 'Professor Pedantic', svg: MeanTeacherSVG },
+      { level: 3, opponent: 'Lord Strawman', svg: SnootyAristocratSVG },
+    ];
+
+    function App() {
+      const [gameState, setGameState] = useState('START');
+      const [player, setPlayer] = useState(null);
+      
+      const [isHardMode, setIsHardMode] = useState(false);
+      const [playerDamage, setPlayerDamage] = useState(0); 
+      const [enemyMaxHP, setEnemyMaxHP] = useState(100);
+      const [enemyDamage, setEnemyDamage] = useState(0);   
+      
+      const [currentLevel, setCurrentLevel] = useState(0);
+      const [timeLeft, setTimeLeft] = useState(20);
+      const [hasShield, setShield] = useState(false);
+      
+      const [currentQ, setCurrentQ] = useState(null);
+      const [currentBoss, setCurrentBoss] = useState(null);
+
+      const [bossPhase, setBossPhase] = useState(1);
+      const [selectedFlaws, setSelectedFlaws] = useState([]);
+      const [counterText, setCounterText] = useState('');
+      const [gradingFeedback, setGradingFeedback] = useState(null); 
+      
+      const [isScreenShaking, setIsScreenShaking] = useState(false);
+      const [enemyHitFlash, setEnemyHitFlash] = useState(false);
+      const [playerHitFlash, setPlayerHitFlash] = useState(false);
+      const [feedbackMsg, setFeedbackMsg] = useState(null);
+      const [timeElapsed, setTimeElapsed] = useState(0);
+      
+      const timerRef = useRef(null);
+      const totalTimerRef = useRef(null);
+
+      const loadNextQuestion = (level) => {
+        let q;
+        if (level === 0) q = generateTier1();
+        else if (level === 1) q = generateTier2();
+        else if (level === 2) q = generateTier3();
+        setCurrentQ(q);
+      };
+
+      const startGame = (hardMode = false) => {
+        setIsHardMode(hardMode);
+        setGameState('SELECT');
+      };
+
+      const selectCharacter = (char) => {
+        setPlayer(char);
+        setPlayerDamage(0);
+        setEnemyDamage(0);
+        setEnemyMaxHP(hardMode => isHardMode ? 200 : 100);
+        setShield(char.id === 'orator');
+        setCurrentLevel(0);
+        setBossPhase(1);
+        setSelectedFlaws([]);
+        setCounterText('');
+        setGradingFeedback(null);
+        setTimeElapsed(0);
+        loadNextQuestion(0);
+        
+        setGameState('FIGHT');
+        
+        totalTimerRef.current = setInterval(() => setTimeElapsed(prev => prev + 1), 1000);
+        startLevelTimer(0, char);
+      };
+
+      const startLevelTimer = (currentDmg, char) => {
+        clearInterval(timerRef.current);
+        let penalty = Math.floor(currentDmg / 25);
+        if (char && char.id === 'archer') penalty = Math.floor(penalty / 2);
+        let newTime = Math.max(5, 20 - penalty); 
+        
+        setTimeLeft(newTime);
+        timerRef.current = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              handleEnemyAttack("TIME'S UP!");
+              return newTime; 
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      };
+
+      const triggerScreenShake = () => {
+        setIsScreenShaking(true);
+        setTimeout(() => setIsScreenShaking(false), 400);
+      };
+
+      const takePlayerDamage = (amount) => {
+        setPlayerDamage(prev => {
+          const newDmg = prev + amount;
+          if (newDmg >= 100) {
+            clearInterval(timerRef.current);
+            clearInterval(totalTimerRef.current);
+            setTimeout(() => setGameState('GAMEOVER'), 1000);
+            return 100;
+          }
+          return newDmg;
+        });
+      };
+
+      const showFeedback = (msg, isPositive = false) => {
+        setFeedbackMsg({ text: msg, isPositive });
+        setTimeout(() => setFeedbackMsg(null), 1000);
+      };
+
+      const handlePlayerAttack = (isCorrect) => {
+        clearInterval(timerRef.current);
+        
+        if (isCorrect) {
+          setEnemyHitFlash(true);
+          triggerScreenShake();
+          showFeedback('SMASH HIT!', true);
+          
+          const dmgDealt = 34;
+          const newEnemyDmg = enemyDamage + dmgDealt;
+          setEnemyDamage(newEnemyDmg);
+
+          setTimeout(() => {
+            setEnemyHitFlash(false);
+            if (newEnemyDmg >= (isHardMode ? 200 : 100)) {
+              let newPlayerDmg = playerDamage;
+              if (player.id === 'summoner') {
+                newPlayerDmg = Math.max(0, playerDamage - 15);
+                setPlayerDamage(newPlayerDmg);
+                showFeedback('CITATIONS HEAL!', true);
+              }
+              
+              if (currentLevel < 2) {
+                setCurrentLevel(prev => prev + 1);
+                setEnemyDamage(0); 
+                loadNextQuestion(currentLevel + 1);
+                startLevelTimer(newPlayerDmg, player);
+              } else {
+                setCurrentLevel(3); 
+                setEnemyDamage(0);
+                setCurrentBoss(generateBossPassage(player.id));
+              }
+            } else {
+              loadNextQuestion(currentLevel);
+              startLevelTimer(playerDamage, player);
+            }
+          }, 1000);
+
+        } else {
+          handleEnemyAttack("WRONG DEVICE!");
+        }
+      };
+
+      const handleEnemyAttack = (reason, damage = 25) => {
+        clearInterval(timerRef.current);
+        triggerScreenShake();
+        
+        if (hasShield && currentLevel < 3) { 
+          setShield(false);
+          showFeedback('ETHOS SHIELD BLOCKED IT!', true);
+          setTimeout(() => {
+            loadNextQuestion(currentLevel);
+            startLevelTimer(playerDamage, player);
+          }, 1000);
+        } else {
+          setPlayerHitFlash(true);
+          takePlayerDamage(damage);
+          showFeedback(`${reason} +${damage}%`, false);
+          
+          setTimeout(() => {
+            setPlayerHitFlash(false);
+            if (playerDamage + damage < 100 && currentLevel < 3) {
+              loadNextQuestion(currentLevel);
+              startLevelTimer(playerDamage + damage, player);
+            }
+          }, 1000);
+        }
+      };
+
+      const submitBossFlaws = () => {
+        const correctFlaws = currentBoss.flaws.filter(f => f.isCorrect).map(f => f.id);
+        const selectedCorrectly = selectedFlaws.every(f => correctFlaws.includes(f)) && selectedFlaws.length === currentBoss.correctCount;
+
+        triggerScreenShake();
+        
+        if (selectedCorrectly) {
+          setEnemyHitFlash(true);
+          let dmg = isHardMode ? 100 : 50; 
+          setEnemyDamage(prev => prev + dmg);
+          showFeedback('BOSS STUNNED!', true);
+          
+          setTimeout(() => {
+            setEnemyHitFlash(false);
+            setBossPhase(2);
+          }, 1500);
+        } else {
+          handleEnemyAttack("WEAK ANALYSIS!", 25);
+        }
+      };
+
+      const gradeResponse = (text, promptText) => {
+        let score = 100;
+        let comments = [];
+        const textTrimmed = text.trim();
+        const textLower = textTrimmed.toLowerCase();
+        const words = textLower.split(/\s+/).filter(w => w.length > 0);
+
+        if (words.length < 10) {
+          score -= 50;
+          comments.push("Argument is incredibly short. Zero commentary provided (-50).");
+        } else if (words.length < 20) {
+          score -= 25;
+          comments.push("Response lacks depth and sufficient expansion (-25).");
+        }
+
+        if (!/^[A-Z]/.test(textTrimmed)) {
+          score -= 10;
+          comments.push("Grammar: Sentence must begin with a capital letter (-10).");
+        }
+        if (!/[.!?]$/.test(textTrimmed)) {
+          score -= 10;
+          comments.push("Grammar: Sentence must end with proper terminal punctuation (-10).");
+        }
+
+        const badPronouns = [' i ', ' me ', ' my ', ' mine ', ' we ', ' us ', ' our ', ' you ', ' your '];
+        let usedPronouns = false;
+        badPronouns.forEach(p => {
+           if (` ${textLower} `.includes(p) || textLower.startsWith(p.trim() + ' ')) usedPronouns = true;
+        });
+        
+        if (usedPronouns) {
+          score -= 30;
+          comments.push("Tone Failure: Used personal/first-person pronouns. Must remain purely objective (-30).");
+        }
+
+        if (promptText.includes('PARALLELISM')) {
+          if (!textLower.includes(' and ') && !textLower.includes(' or ') && !text.includes(';')) {
+            score -= 40;
+            comments.push("Failed Parallelism: Missing syntactical balance via conjunctions or semicolons (-40).");
+          }
+        }
+        if (promptText.includes('ANTITHESIS')) {
+          if (!textLower.includes('but') && !textLower.includes('yet') && !textLower.includes('however') && !textLower.includes('whereas')) {
+            score -= 40;
+            comments.push("Failed Antithesis: Missing stark contrast (e.g., 'but', 'yet', 'however') (-40).");
+          }
+        }
+        if (promptText.includes('POLYSYNDETON')) {
+          const conjunctions = (textLower.match(/\band\b|\bor\b/g) || []).length;
+          if (conjunctions < 2) {
+            score -= 40;
+            comments.push("Failed Polysyndeton: Requires multiple coordinating conjunctions ('and', 'or') (-40).");
+          }
+        }
+        if (promptText.includes('ASYNDETON')) {
+          if (textLower.includes(' and ') || textLower.includes(' or ') || textLower.includes(' but ')) {
+            score -= 40;
+            comments.push("Failed Asyndeton: Used conjunctions! Must rely entirely on commas (-40).");
+          }
+        }
+        if (promptText.includes('IRONY')) {
+          if (!text.includes('!') && !text.includes('"') && !textLower.includes('clearly') && !textLower.includes('obviously') && !textLower.includes('perfect')) {
+            score -= 20;
+            comments.push("Failed Irony: Sarcasm/irony is completely undetectable. Exaggerate more (-20).");
+          }
+        }
+        if (promptText.includes('QUESTION')) {
+          if (!text.endsWith('?')) {
+            score -= 40;
+            comments.push("Failed Rhetorical Question: Sentence MUST end with a question mark (?) (-40).");
+          }
+        }
+
+        const longWords = words.filter(w => w.replace(/[^a-z]/g, '').length >= 8).length;
+        if (longWords < 1 && words.length >= 10) {
+          score -= 15;
+          comments.push("Diction is too simplistic. Utilize elevated, academic vocabulary (-15).");
+        }
+
+        score = Math.max(0, Math.min(100, score));
+
+        if (score === 100) {
+          comments.push("Flawless execution! A masterful AP-level response.");
+        } else if (score >= 85) {
+          comments.push("Strong rhetorical analysis. You pass the threshold!");
+        }
+
+        return { score, comments };
+      };
+
+      const submitBossCounter = () => {
+        triggerScreenShake();
+        
+        const result = gradeResponse(counterText, currentBoss.prompt);
+        setGradingFeedback(result);
+
+        if (result.score < 85) {
+          handleEnemyAttack("SCORE TOO LOW!", 25);
+        } else {
+          setEnemyHitFlash(true);
+          showFeedback('GAME SET!', true);
+          setEnemyDamage(isHardMode ? 200 : 100); 
+          clearInterval(totalTimerRef.current);
+          setTimeout(() => setGameState('VICTORY'), 2500);
+        }
+      };
+
+      const renderHPBar = (current, max, isPlayer) => {
+        const percent = Math.min(100, (current / max) * 100);
+        const color = percent >= 75 ? 'bg-red-600' : percent >= 50 ? 'bg-yellow-500' : 'bg-green-500';
+        
+        return (
+          <div className="w-full bg-zinc-800 h-6 border-2 border-black rounded-full overflow-hidden mt-1 relative">
+            <div 
+              className={`h-full transition-all duration-300 ${color}`}
+              style={{ width: `${percent}%`, float: isPlayer ? 'left' : 'right' }}
+            ></div>
+            <div className="absolute inset-0 flex justify-center items-center text-xs font-black text-white mix-blend-difference">
+              {Math.floor((current / max) * 100)}% DMG
+            </div>
+          </div>
+        );
+      };
+
+      if (gameState === 'START') {
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+            <div className="absolute inset-0 opacity-40 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-800 via-neutral-900 to-black"></div>
+            <div className="z-10 text-center animate-pulse mt-[-10vh]">
+              <Flame className="w-24 h-24 mx-auto text-red-600 mb-2 drop-shadow-[0_0_20px_rgba(220,38,38,1)]" />
+              <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 via-red-500 to-purple-800 uppercase tracking-tighter italic mb-1 smash-text-stroke">
+                Rhetorical
+              </h1>
+              <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter italic mb-10 smash-text-stroke">
+                Roast
+              </h1>
+              <button 
+                onClick={() => startGame(false)}
+                className="px-12 py-4 bg-red-600 text-white font-black text-2xl uppercase tracking-widest rounded-full border-4 border-yellow-400 hover:scale-105 hover:bg-red-500 transition-all shadow-[0_0_20px_rgba(250,204,21,0.5)]"
+              >
+                Play Normal
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      if (gameState === 'SELECT') {
+        return (
+          <div className="min-h-screen bg-zinc-900 p-6 md:p-12 text-white relative flex flex-col">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+               <h2 className="text-4xl md:text-5xl font-black italic uppercase tracking-tighter smash-text-stroke">
+                 Choose Fighter
+               </h2>
+               {isHardMode && (
+                 <span className="bg-red-600 text-white px-4 py-2 font-black uppercase rounded shadow-[0_0_15px_rgba(220,38,38,0.8)] animate-pulse text-center">
+                   Vengeance Mode (Villains 200 HP)
+                 </span>
+               )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 flex-1 max-w-7xl mx-auto w-full">
+              {CHARACTERS.map(char => {
+                const IconComp = char.icon;
+                return (
+                  <button 
+                    key={char.id}
+                    onClick={() => selectCharacter(char)}
+                    className="bg-zinc-800 border-4 border-zinc-600 hover:border-yellow-400 p-4 flex flex-col items-center text-center transition-all hover:-translate-y-2 group shadow-xl rounded-xl"
+                  >
+                    <IconComp className={`w-20 h-20 mb-4 ${char.color} drop-shadow-[0_0_10px_currentColor] group-hover:scale-110 transition-transform`} />
+                    <h3 className="text-xl font-black mb-2 uppercase italic">{char.name}</h3>
+                    <p className="text-sm text-zinc-300 mb-4 font-medium flex-1">{char.desc}</p>
+                    <div className="bg-black p-2 w-full border-t border-zinc-700 rounded-b">
+                      <span className="text-xs font-black text-red-500 uppercase block">Passive</span>
+                      <span className="text-xs font-bold text-white uppercase">{char.passive}</span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        );
+      }
+
+      if (gameState === 'FIGHT') {
+        const isBoss = currentLevel === 3;
+        const opponentName = isBoss ? currentBoss?.title : LEVELS_INFO[currentLevel]?.opponent;
+        const FoeSVG = isBoss ? BossMastermindSVG : LEVELS_INFO[currentLevel]?.svg;
+        const PlayerIcon = player.icon;
+        const currentQText = isBoss ? (bossPhase === 1 ? currentBoss?.passage : currentBoss?.prompt) : currentQ?.q;
+
+        return (
+          <div className={`h-screen flex flex-col overflow-hidden ${isScreenShaking ? 'animate-shake' : ''}`}>
+            <div className="absolute inset-0 z-0 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-900 to-black opacity-90"></div>
+              <div className="absolute bottom-0 w-full h-1/2 bg-[linear-gradient(rgba(255,255,255,0.05)_2px,transparent_2px),linear-gradient(90deg,rgba(255,255,255,0.05)_2px,transparent_2px)] bg-[size:50px_50px] transform perspective-[500px] rotateX-[60deg] origin-top"></div>
+            </div>
+
+            <div className="w-full bg-black/90 border-b-2 border-zinc-800 px-6 py-3 flex justify-between items-center z-30 shadow-lg h-[10%] min-h-[70px]">
+              <div className="flex flex-col items-start w-1/3 max-w-[200px]">
+                 <span className="text-zinc-400 font-bold uppercase tracking-widest text-xs md:text-sm truncate">{player.name}</span>
+                 {renderHPBar(playerDamage, 100, true)}
+              </div>
+
+              <div className="flex flex-col items-center justify-center w-1/3">
+                <span className="text-yellow-400 font-black uppercase italic tracking-widest text-lg md:text-xl smash-text-stroke whitespace-nowrap">
+                  {isBoss ? 'FINAL BOSS' : `STAGE ${currentLevel + 1}`}
+                </span>
+                {!isBoss && (
+                  <span className="text-2xl md:text-3xl font-black italic tracking-tighter text-white">
+                    {timeLeft}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex flex-col items-end w-1/3 max-w-[200px]">
+                 <span className="text-zinc-400 font-bold uppercase tracking-widest text-xs md:text-sm truncate">{opponentName}</span>
+                 {renderHPBar(enemyDamage, enemyMaxHP, false)}
+              </div>
+            </div>
+
+            <div className="flex-1 relative z-20 w-full max-w-6xl mx-auto flex items-center justify-center p-4">
+              <div className={`absolute bottom-4 md:bottom-10 left-4 md:left-10 w-28 h-28 md:w-40 md:h-40 transition-all ${playerHitFlash ? 'brightness-50 opacity-50 translate-x-[-20px]' : ''}`}>
+                 <div className="absolute inset-0 bg-blue-500 opacity-20 rounded-full blur-[20px] animate-pulse"></div>
+                 <PlayerIcon className={`w-full h-full ${player.color} drop-shadow-[0_0_15px_currentColor]`} />
+                 {hasShield && <div className="absolute inset-0 border-4 border-blue-400 rounded-full animate-spin"></div>}
+              </div>
+
+              <div className="absolute top-2 md:top-6 right-2 md:right-1/4 w-[90%] max-w-xl z-40 animate-fade-in">
+                <div className="bg-white text-black p-4 md:p-6 rounded-2xl border-4 border-black shadow-[6px_6px_0px_rgba(0,0,0,0.8)] relative">
+                  {isBoss && <AlertCircle className="w-6 h-6 text-red-600 mb-1" />}
+                  <p className={`font-medium leading-snug text-black ${isBoss && bossPhase === 1 ? 'text-sm md:text-base' : 'text-lg md:text-xl'}`}>
+                    {currentQText}
+                  </p>
+                  <div className="speech-bubble-tail"></div>
+                </div>
+              </div>
+
+              <div className={`absolute bottom-0 md:bottom-4 right-0 md:right-10 w-[200px] h-[200px] md:w-[320px] md:h-[320px] transition-all ${enemyHitFlash ? 'brightness-200 scale-95 opacity-80 translate-x-[20px]' : 'animate-[bounce_3s_infinite]'}`}>
+                {FoeSVG && <FoeSVG />}
+              </div>
+
+              {feedbackMsg && (
+                <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none">
+                   <span className={`text-5xl md:text-7xl font-black uppercase italic tracking-tighter smash-text-stroke whitespace-nowrap ${feedbackMsg.isPositive ? 'text-green-400' : 'text-red-500'}`}>
+                     {feedbackMsg.text}
+                   </span>
+                </div>
+              )}
+            </div>
+
+            <div className="w-full bg-zinc-900/95 border-t-2 border-zinc-700 p-4 md:p-6 z-30 min-h-[180px] flex items-center justify-center shadow-[0_-10px_20px_rgba(0,0,0,0.5)]">
+              <div className="w-full max-w-4xl">
+                
+                {!isBoss && currentQ && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    {currentQ.opts.map((opt, i) => (
+                      <button
+                        key={i}
+                        onClick={() => handlePlayerAttack(opt === currentQ.a)}
+                        className="bg-zinc-800 hover:bg-white border border-zinc-600 hover:border-black text-white hover:text-black py-3 px-4 rounded-xl font-bold text-lg md:text-xl transition-all shadow shadow-black flex items-center justify-center"
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {isBoss && bossPhase === 1 && currentBoss && (
+                  <div className="flex flex-col items-center w-full">
+                    <p className="text-zinc-400 font-bold uppercase tracking-widest mb-2 text-sm">Select {currentBoss.correctCount} Logical Flaws</p>
+                    <div className="flex flex-wrap justify-center gap-2 mb-4 w-full">
+                      {currentBoss.flaws.map(flaw => (
+                        <button
+                          key={flaw.id}
+                          onClick={() => setSelectedFlaws(prev => prev.includes(flaw.id) ? prev.filter(id => id !== flaw.id) : [...prev, flaw.id])}
+                          className={`px-4 py-2 rounded-lg font-black text-xs md:text-sm uppercase border transition-all ${
+                            selectedFlaws.includes(flaw.id) 
+                              ? 'bg-yellow-400 border-white text-black scale-105' 
+                              : 'bg-zinc-800 border-zinc-600 text-zinc-300 hover:border-yellow-400 hover:text-white'
+                          }`}
+                        >
+                          {flaw.text}
+                        </button>
+                      ))}
+                    </div>
+                    <button 
+                      onClick={submitBossFlaws}
+                      disabled={selectedFlaws.length !== currentBoss.correctCount}
+                      className="w-full max-w-md bg-red-600 active:translate-y-1 text-white font-black text-xl py-3 rounded-xl uppercase disabled:opacity-50 transition-all shadow-md"
+                    >
+                      Confirm Targets
+                    </button>
+                  </div>
+                )}
+
+                {isBoss && bossPhase === 2 && (
+                  <div className="flex flex-col gap-3">
+                    {gradingFeedback && (
+                      <div className={`p-4 rounded-xl border-2 shadow-inner transition-all ${gradingFeedback.score >= 85 ? 'bg-green-900 border-green-500' : 'bg-red-950 border-red-500'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <PenTool className={gradingFeedback.score >= 85 ? 'text-green-400' : 'text-red-400'} />
+                          <span className={`font-black text-xl ${gradingFeedback.score >= 85 ? 'text-green-300' : 'text-red-300'}`}>
+                            AP Grader Score: {gradingFeedback.score}/100
+                          </span>
+                        </div>
+                        <ul className="list-disc pl-5 text-sm md:text-base text-zinc-200 font-medium space-y-1">
+                          {gradingFeedback.comments.map((comment, idx) => (
+                            <li key={idx}>{comment}</li>
+                          ))}
+                        </ul>
+                        {gradingFeedback.score < 85 && (
+                          <div className="mt-2 font-bold text-yellow-400 uppercase tracking-widest text-xs md:text-sm">
+                            * Score must be 85+ to deal the final blow. Try again! *
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <textarea
+                      value={counterText}
+                      onChange={(e) => setCounterText(e.target.value)}
+                      placeholder="Type your counter-argument here..."
+                      className="w-full bg-white border-2 border-black text-black text-lg p-3 rounded-lg focus:outline-none focus:ring-4 focus:ring-yellow-400 font-medium resize-none transition-all"
+                      rows={gradingFeedback ? 2 : 3}
+                      autoFocus
+                    />
+                    <button 
+                      onClick={submitBossCounter}
+                      className="w-full bg-green-500 active:translate-y-1 text-white font-black text-2xl py-3 rounded-xl uppercase tracking-widest hover:bg-green-400 transition-all shadow-md"
+                    >
+                      Deliver Final Blow
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (gameState === 'VICTORY' || gameState === 'GAMEOVER') {
+        const isVictory = gameState === 'VICTORY';
+        const finalTime = `${Math.floor(timeElapsed/60)}:${(timeElapsed%60).toString().padStart(2, '0')}`;
+        
+        return (
+          <div className="min-h-screen flex flex-col items-center justify-start py-10 px-4 relative overflow-y-auto">
+            <div className={`fixed inset-0 opacity-40 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] ${isVictory ? 'from-yellow-600 to-black' : 'from-red-900 to-black'} pointer-events-none`}></div>
+            
+            <div className="z-10 text-center mb-10 mt-4">
+              {isVictory ? (
+                <h1 className="text-7xl md:text-[100px] font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-orange-600 uppercase italic tracking-tighter smash-text-stroke transform -skew-x-6">
+                  GAME!
+                </h1>
+              ) : (
+                <h1 className="text-7xl md:text-[100px] font-black text-red-600 uppercase italic tracking-tighter smash-text-stroke transform -skew-x-6">
+                  DEFEATED
+                </h1>
+              )}
+            </div>
+
+            <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6 z-10 text-white">
+              
+              <div className="bg-zinc-900 border-2 border-zinc-700 p-6 rounded-xl shadow-2xl h-fit relative">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-black px-4 py-1 border border-zinc-600 rounded-full">
+                  <span className="text-white text-sm font-black tracking-widest uppercase">RESULTS</span>
+                </div>
+                <div className="space-y-4 mt-4">
+                  <div className="flex justify-between items-center text-lg border-b border-zinc-800 pb-2">
+                    <span className="text-zinc-400 font-bold uppercase">Fighter</span>
+                    <span className="text-white font-black uppercase">{player?.name}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-lg border-b border-zinc-800 pb-2">
+                    <span className="text-zinc-400 font-bold uppercase">Damage</span>
+                    <span className={`font-black ${isVictory ? 'text-white' : 'text-red-500'}`}>{playerDamage}%</span>
+                  </div>
+                  <div className="flex justify-between items-center text-lg">
+                    <span className="text-zinc-400 font-bold uppercase">Clear Time</span>
+                    <span className="text-yellow-400 font-black">{finalTime}</span>
+                  </div>
+                </div>
+                
+                <div className="mt-8 flex flex-col gap-3">
+                  <button 
+                    onClick={() => startGame(false)}
+                    className="w-full px-6 py-3 bg-white text-black font-black text-lg uppercase tracking-widest rounded-full hover:bg-yellow-400 transition-colors shadow"
+                  >
+                    Play Normal Mode
+                  </button>
+                  {!isVictory && (
+                     <button 
+                      onClick={() => startGame(true)}
+                      className="w-full px-6 py-3 bg-red-600 flex justify-center items-center gap-2 text-white font-black text-lg uppercase tracking-widest rounded-full hover:bg-red-500 transition-colors shadow"
+                    >
+                      <Skull className="w-5 h-5" /> Vengeance Mode (200HP)
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {isVictory && (
+                <div className="bg-black border-2 border-yellow-500 p-6 rounded-xl relative">
+                   <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 bg-yellow-500 px-4 py-1 border border-white rounded-full flex items-center gap-2">
+                    <Trophy className="text-black fill-current w-4 h-4" />
+                    <span className="text-black text-sm font-black tracking-widest uppercase">HALL OF FAME</span>
+                   </div>
+                   
+                   <div className="mt-4 space-y-3">
+                      <div className="flex justify-between items-center bg-yellow-500/20 border border-yellow-400 p-2 rounded-md text-base">
+                        <span className="text-white font-black uppercase flex gap-2">
+                          <span className="text-yellow-400">1.</span> YOU
+                        </span>
+                        <div className="flex gap-4 font-black">
+                          <span className="text-white">{finalTime}</span>
+                          <span className="text-red-400">{playerDamage}%</span>
+                        </div>
+                      </div>
+
+                      {FICTIONAL_LEADERBOARD.map((entry, idx) => (
+                        <div key={idx} className="flex justify-between items-center bg-zinc-900 border border-zinc-800 p-2 rounded-md text-sm">
+                          <span className="text-zinc-400 font-bold uppercase flex gap-2">
+                            <span className="text-zinc-600">{idx + 2}.</span> {entry.name}
+                          </span>
+                          <div className="flex gap-4 font-bold">
+                            <span className="text-zinc-500">{entry.time}</span>
+                            <span className="text-zinc-600">{entry.percent}</span>
+                          </div>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      return null;
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
+
+```
