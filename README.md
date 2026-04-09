@@ -1,3 +1,3 @@
-# Mr. Cristiano AP Research
+# Games for developing English and AP Research Skills
 This is guide for students in AP English Language Composition
 The aim and goal of this project is to further AP Lang students' preparation and English Language skills for the AP Exam 
