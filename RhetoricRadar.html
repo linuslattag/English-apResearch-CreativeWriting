@@ -3,669 +3,418 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rhetoric Radar</title>
+<title>Rhetoric Radar — AP Lang</title>
 <style>
+/* ===== RESET & ROOT ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --ethos: #3B82F6;
-  --pathos: #F59E0B;
-  --logos: #10B981;
-  --fallacy: #EF4444;
-  --bg: #FAFAFA;
-  --surface: #FFFFFF;
-  --text: #1E293B;
-  --text-secondary: #64748B;
-  --border: #E2E8F0;
+  --ethos: #38bdf8;   /* Neon Blue */
+  --pathos: #f472b6;  /* Neon Pink */
+  --logos: #4ade80;   /* Neon Green */
+  --fallacy: #f87171; /* Neon Red */
+  
+  --bg: #070b19;
+  --surface: #0f172a;
+  --card: #1e293b;
+  --text: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border: #334155;
   --radius: 12px;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.6;
   min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* RADAR BACKGROUND ANIMATION */
+.radar-bg {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.03) 0%, transparent 60%),
+    linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .screen { display: none; min-height: 100vh; }
-.screen.active { display: flex; flex-direction: column; }
+.screen.active { display: flex; flex-direction: column; animation: fadeIn 0.4s ease-out; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── MODALS & LOADERS ── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(7, 11, 25, 0.85); backdrop-filter: blur(5px);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: var(--surface); border: 1px solid var(--ethos);
+  border-radius: var(--radius); padding: 2.5rem; max-width: 600px; width: 90%;
+  box-shadow: 0 10px 50px rgba(56, 189, 248, 0.2); text-align: left;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-title {
+  color: var(--ethos); font-size: 1.5rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem;
+}
+.modal-content p { color: var(--text-secondary); margin-bottom: 1rem; }
+.modal-content ul { color: var(--text); margin-left: 1.5rem; margin-bottom: 2rem; }
+.modal-content li { margin-bottom: 0.8rem; }
+
+/* Field Manual Specifics */
+.def-block { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid; }
+.def-ethos { border-left-color: var(--ethos); }
+.def-pathos { border-left-color: var(--pathos); }
+.def-logos { border-left-color: var(--logos); }
+.def-fallacy { border-left-color: var(--fallacy); }
+.def-title { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 5px; }
+.def-ethos .def-title { color: var(--ethos); }
+.def-pathos .def-title { color: var(--pathos); }
+.def-logos .def-title { color: var(--logos); }
+.def-fallacy .def-title { color: var(--fallacy); }
+.def-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.4; }
+
+/* AI Loader */
+.ai-loader { text-align: center; color: var(--ethos); font-family: monospace; font-size: 1.1rem; letter-spacing: 0.1em; }
+.ai-spinner {
+  width: 50px; height: 50px; border: 4px solid rgba(56, 189, 248, 0.2);
+  border-top-color: var(--ethos); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
 
 /* ── HOME ── */
-#home {
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  text-align: center;
-}
+#home { align-items: center; justify-content: center; padding: 2rem; text-align: center; }
 
+.logo-container { margin-bottom: 1.5rem; position: relative; }
 .logo {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  margin-bottom: 0.25rem;
+  font-size: 3.5rem; font-weight: 900; letter-spacing: -0.05em;
+  text-transform: uppercase; text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
 }
-
 .logo-accent { color: var(--ethos); }
-
-.subtitle {
-  color: var(--text-secondary);
-  font-size: 1.05rem;
-  margin-bottom: 2.5rem;
-  max-width: 400px;
-}
+.subtitle { color: var(--text-secondary); font-size: 1.1rem; max-width: 500px; margin: 0 auto 2rem; }
 
 .home-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2rem;
-  width: 100%;
-  max-width: 420px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 600px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
-.input-group { margin-bottom: 1.25rem; text-align: left; }
+/* PERSONA DRAFTING */
+.draft-section { margin-bottom: 2rem; text-align: left; }
+.draft-title {
+  font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ethos); margin-bottom: 1rem; font-weight: 700;
+}
+.persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.persona-card {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.2s; text-align: left;
+}
+.persona-card:hover { border-color: var(--text-secondary); transform: translateY(-2px); }
+.persona-card.selected { 
+  border-color: var(--ethos); background: rgba(56, 189, 248, 0.1); 
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); 
+}
+.p-name { font-weight: bold; font-size: 1rem; margin-bottom: 0.2rem; }
+.p-perk { font-size: 0.8rem; color: var(--text-secondary); }
+.p-ethos .p-name { color: var(--ethos); }
+.p-pathos .p-name { color: var(--pathos); }
+.p-logos .p-name { color: var(--logos); }
+.p-fallacy .p-name { color: var(--fallacy); }
 
+.input-group { margin-bottom: 1.5rem; text-align: left; }
 .input-group label {
-  display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 0.4rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;
 }
-
 .input-group input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: inherit;
-  transition: border-color 0.2s;
+  width: 100%; padding: 0.9rem 1rem; background: var(--bg); color: var(--text);
+  border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; transition: border-color 0.2s;
 }
-
-.input-group input:focus {
-  outline: none;
-  border-color: var(--ethos);
-}
+.input-group input:focus { outline: none; border-color: var(--ethos); }
 
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: transform 0.1s, opacity 0.2s;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 1rem 2rem; border: none; border-radius: 8px; font-size: 1rem;
+  font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  cursor: pointer; transition: all 0.2s;
 }
-
 .btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--ethos); color: #000; width: 100%; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); margin-bottom: 10px;}
+.btn-primary:hover { background: #7dd3fc; box-shadow: 0 0 30px rgba(56, 189, 248, 0.6); }
 
-.btn-primary {
-  background: var(--ethos);
-  color: #fff;
-  width: 100%;
+.btn-group-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.btn-secondary { background: var(--card); color: var(--text); flex: 1; border: 1px solid var(--border); font-size: 0.8rem; padding: 0.8rem;}
+.btn-secondary:hover { background: var(--border); }
+
+/* AI Specific Button */
+.btn-ai {
+  background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; width: 100%; margin-top: 10px;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
+.btn-ai:hover { box-shadow: 0 0 30px rgba(139, 92, 246, 0.6); transform: translateY(-2px); }
 
-.btn-primary:hover { opacity: 0.9; }
-
-.btn-secondary {
-  background: var(--border);
-  color: var(--text);
+.divider {
+  display: flex; align-items: center; text-align: center; margin: 2rem 0;
+  color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em;
 }
-
-.btn-secondary:hover { background: #CBD5E1; }
-
-.stats-preview {
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
-  text-align: left;
-}
-
-.stats-preview h3 {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  margin-bottom: 0.75rem;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.35rem 0;
-  font-size: 0.95rem;
-}
-
-.stat-label { color: var(--text-secondary); }
-.stat-value { font-weight: 600; }
-
-.appeal-bars { margin-top: 1rem; }
-
-.appeal-bar-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.85rem;
-}
-
-.appeal-bar-label {
-  width: 60px;
-  font-weight: 600;
-  text-align: right;
-}
-
-.appeal-bar-track {
-  flex: 1;
-  height: 8px;
-  background: var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.appeal-bar-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease;
-}
-
-.appeal-bar-pct {
-  width: 36px;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
+.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--border); }
+.divider:not(:empty)::before { margin-right: 1em; }
+.divider:not(:empty)::after { margin-left: 1em; }
 
 /* ── ROUND ── */
-#round {
-  padding: 0;
-}
-
 .round-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  position: sticky; top: 0; z-index: 10; background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem; display: flex; align-items: center; justify-content: space-between;
 }
-
-.round-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
+.round-info { display: flex; align-items: center; gap: 1rem; }
 .round-badge {
-  background: var(--ethos);
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.3rem 0.75rem;
-  border-radius: 20px;
+  background: rgba(56, 189, 248, 0.2); color: var(--ethos); border: 1px solid var(--ethos);
+  font-size: 0.8rem; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; text-transform: uppercase;
 }
-
-.round-title {
-  font-size: 0.95rem;
-  font-weight: 600;
+.clearance-badge {
+  background: rgba(74, 222, 128, 0.15); color: var(--logos); border: 1px solid var(--logos);
+  font-size: 0.8rem; font-weight: 700; padding: 0.3rem 0.75rem; border-radius: 20px; text-transform: uppercase;
 }
+.round-score { font-size: 1.1rem; color: #fbbf24; font-weight: 800; font-family: monospace; }
 
-.round-score {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
+.passage-container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem 8rem; }
+.passage-meta { margin-bottom: 2rem; }
+.passage-source { font-size: 0.9rem; color: var(--ethos); font-family: monospace; margin-bottom: 0.5rem; }
+.passage-instructions { font-size: 0.9rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;}
 
-.passage-container {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 8rem;
-}
-
-.passage-meta {
-  margin-bottom: 1.5rem;
-}
-
-.passage-source {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-style: italic;
-  margin-bottom: 0.5rem;
-}
-
-.passage-instructions {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  background: #F1F5F9;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  line-height: 1.5;
-}
-
-.passage-text {
-  font-size: 1.1rem;
-  line-height: 1.85;
-  color: var(--text);
-}
-
+.passage-text { font-size: 1.3rem; line-height: 2; color: #cbd5e1; }
 .sentence {
-  cursor: pointer;
-  padding: 2px 1px;
-  border-radius: 3px;
-  transition: background 0.15s;
-  position: relative;
-  border-bottom: 3px solid transparent;
+  cursor: pointer; padding: 2px 4px; border-radius: 4px;
+  transition: all 0.2s; position: relative; border-bottom: 2px solid transparent;
 }
+.sentence:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.sentence.tagged { background: rgba(255,255,255,0.03); color: #fff; }
 
-.sentence:hover {
-  background: #F1F5F9;
-}
-
-.sentence.tagged {
-  background: rgba(59, 130, 246, 0.04);
-}
-
-.tag-indicators {
-  display: inline-flex;
-  gap: 2px;
-  margin-left: 3px;
-  vertical-align: middle;
-}
-
-.tag-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
+.tag-indicators { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
+.tag-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
 
 /* Tag picker popup */
 .tag-picker {
-  position: fixed;
-  z-index: 100;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-  padding: 0.5rem;
-  display: none;
+  position: fixed; z-index: 100; background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); padding: 0.5rem; display: none;
 }
-
-.tag-picker.visible { display: block; }
-
-.tag-picker-title {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  padding: 0.4rem 0.75rem 0.25rem;
-  font-weight: 600;
-}
+.tag-picker.visible { display: block; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 
 .tag-option {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 0.75rem;
-  border: none;
-  background: none;
-  width: 100%;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 0.92rem;
-  font-family: inherit;
-  color: var(--text);
-  transition: background 0.1s;
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+  border: none; background: none; width: 100%; cursor: pointer; border-radius: 8px;
+  font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); transition: all 0.15s;
 }
-
-.tag-option:hover { background: #F1F5F9; }
-
-.tag-option.selected { font-weight: 700; }
-
-.tag-color {
-  width: 12px;
-  height: 12px;
-  border-radius: 3px;
-}
-
-.tag-check {
-  margin-left: auto;
-  font-size: 0.85rem;
-}
+.tag-option:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.tag-option.selected { color: #fff; background: rgba(255,255,255,0.08); }
+.tag-color { width: 14px; height: 14px; border-radius: 4px; box-shadow: 0 0 10px currentColor; }
+.tag-check { margin-left: auto; font-size: 1rem; color: #fff; }
 
 .submit-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  z-index: 10;
+  position: fixed; bottom: 0; left: 0; right: 0; background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 1rem 1.5rem;
+  display: flex; align-items: center; justify-content: center; gap: 2rem; z-index: 10;
 }
-
-.tag-summary {
-  display: flex;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.tag-count-chip {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.tag-count-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.btn-submit {
-  background: var(--ethos);
-  color: #fff;
-  padding: 0.7rem 2rem;
-}
+.btn-submit { background: var(--text); color: #000; padding: 0.8rem 3rem; }
+.btn-submit:hover { background: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.3); }
 
 /* ── RESULTS ── */
-#results {
-  padding: 0;
-}
-
+#results { padding: 0; }
 .results-header {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 1.5rem;
-  text-align: center;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 3rem 1.5rem; text-align: center; position: relative; overflow: hidden;
 }
-
-.results-score {
-  font-size: 2rem;
-  font-weight: 800;
+.rank-stamp {
+  font-size: 6rem; font-weight: 900; line-height: 1; margin-bottom: 0.5rem;
+  text-shadow: 0 0 30px currentColor;
 }
+.rank-S { color: #fbbf24; } /* Gold */
+.rank-A { color: var(--logos); }
+.rank-B { color: var(--ethos); }
+.rank-C { color: var(--pathos); }
+.rank-F { color: var(--fallacy); }
 
-.results-breakdown {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
+.results-score-anim { font-size: 1.5rem; font-weight: 700; color: var(--text-secondary); font-family: monospace; margin-bottom: 10px;}
+.promotion-banner { 
+  display: inline-block; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase;
 }
+.promo-success { background: rgba(74, 222, 128, 0.2); color: var(--logos); border: 1px solid var(--logos); }
+.promo-fail { background: rgba(248, 113, 113, 0.2); color: var(--fallacy); border: 1px solid var(--fallacy); }
+.promo-custom { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid #c4b5fd; }
 
-.rb-correct { color: var(--logos); font-weight: 600; }
-.rb-wrong { color: var(--fallacy); font-weight: 600; }
-.rb-missed { color: var(--text-secondary); font-weight: 600; }
-
-.results-passage {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 2rem 1.5rem 6rem;
+.results-passage { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem 8rem; }
+.result-sentence-block {
+  margin-bottom: 1.5rem; background: var(--card); border-radius: 8px; padding: 12px;
+  border-left: 4px solid transparent; position: relative;
 }
-
-.result-sentence {
-  padding: 2px 1px;
-  border-radius: 3px;
-  position: relative;
-}
-
-.result-tags {
-  display: inline;
-  margin-left: 4px;
-}
-
+.result-sentence { display: block; font-size: 1.1rem;}
+.result-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .result-tag {
-  display: inline-block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 4px;
-  margin: 0 1px;
-  vertical-align: middle;
+  font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 4px;
+  text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 4px;
+}
+.result-tag.correct { background: rgba(74, 222, 128, 0.15); color: var(--logos); border: 1px solid var(--logos); }
+.result-tag.bonus { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid #fbbf24; }
+.result-tag.wrong { background: rgba(248, 113, 113, 0.15); color: var(--fallacy); border: 1px solid var(--fallacy); text-decoration: line-through; }
+.result-tag.missed { background: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border: 1px dashed var(--text-secondary); }
+
+/* Hardcoded Exp Box (Lazy Proof) */
+.hardcoded-exp-box {
+  margin-top: 12px; background: rgba(15, 23, 42, 0.8); border-left: 3px solid var(--text-secondary);
+  padding: 10px 14px; border-radius: 4px; font-size: 0.9rem; color: #e2e8f0; line-height: 1.5;
 }
 
-.result-tag.correct {
-  background: rgba(16, 185, 129, 0.15);
-  color: #047857;
+/* AI Debrief UI */
+.ai-debrief-container { margin-top: 10px; }
+.btn-micro-ai {
+  background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.4); color: #c4b5fd;
+  border-radius: 4px; padding: 4px 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
 }
-
-.result-tag.wrong {
-  background: rgba(239, 68, 68, 0.15);
-  color: #B91C1C;
-  text-decoration: line-through;
-}
-
-.result-tag.missed {
-  background: rgba(100, 116, 139, 0.12);
-  color: #475569;
-  border: 1px dashed #94A3B8;
+.btn-micro-ai:hover { background: rgba(139, 92, 246, 0.3); }
+.ai-explanation-box {
+  margin-top: 8px; background: rgba(15, 23, 42, 0.6); border-left: 3px solid #8b5cf6;
+  padding: 10px 14px; border-radius: 4px; font-size: 0.95rem; color: #e2e8f0; display: none;
+  animation: fadeIn 0.3s ease; line-height: 1.5;
 }
 
 .results-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  padding: 1rem 1.5rem;
-  display: flex;
-  justify-content: center;
+  position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface);
+  border-top: 1px solid var(--border); padding: 1rem 1.5rem; display: flex; justify-content: center;
 }
-
-.btn-next {
-  background: var(--ethos);
-  color: #fff;
-  padding: 0.7rem 2.5rem;
-}
+.btn-next { background: var(--ethos); color: #000; padding: 0.8rem 4rem; }
 
 /* ── END ── */
-#end {
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  text-align: center;
-}
-
+#end { align-items: center; justify-content: center; padding: 2rem; text-align: center; }
 .end-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 2.5rem 2rem;
-  max-width: 480px;
-  width: 100%;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 3rem 2rem; max-width: 500px; width: 100%; box-shadow: 0 10px 50px rgba(0,0,0,0.5);
 }
+.end-title { font-size: 2rem; font-weight: 900; margin-bottom: 0.5rem; text-transform: uppercase; color: var(--ethos);}
+.end-subtitle { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;}
 
-.end-title {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
-}
+.final-clearance { font-size: 1.3rem; font-weight: 700; color: var(--logos); margin-bottom: 2rem; padding: 10px; border: 1px solid var(--logos); border-radius: 8px; background: rgba(74,222,128,0.1); }
 
-.end-subtitle {
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-}
+.end-stat-value { font-size: 3.5rem; font-weight: 900; color: #fbbf24; font-family: monospace; line-height: 1; margin-bottom: 0.5rem; text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);}
+.end-stat-label { font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem;}
 
-.end-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.end-stat {
-  background: #F8FAFC;
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.end-stat-value {
-  font-size: 1.6rem;
-  font-weight: 800;
-}
-
-.end-stat-label {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.end-appeal-breakdown {
-  text-align: left;
-  margin-bottom: 2rem;
-}
-
-.end-appeal-breakdown h3 {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-}
-
-.end-appeal-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.6rem;
-}
-
-.end-appeal-label {
-  width: 70px;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.end-appeal-bar {
-  flex: 1;
-  height: 10px;
-  background: var(--border);
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.end-appeal-fill {
-  height: 100%;
-  border-radius: 5px;
-}
-
-.end-appeal-pct {
-  width: 40px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-align: right;
-}
-
-.end-insight {
-  background: #F1F5F9;
-  border-radius: 8px;
-  padding: 1rem;
-  font-size: 0.92rem;
-  margin-bottom: 1.5rem;
-  text-align: left;
-  line-height: 1.5;
-}
-
-.end-insight strong { color: var(--ethos); }
-
-.end-highscore {
-  color: var(--logos);
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-}
-
-.btn-replay {
-  background: var(--ethos);
-  color: #fff;
-  padding: 0.8rem 2.5rem;
-}
-
-/* ── LEGEND ── */
-.legend {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-  font-size: 0.82rem;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-}
+.btn-replay { background: var(--text); color: #000; padding: 1rem 3rem; margin-top: 1rem; }
 
 /* ── MOBILE ── */
 @media (max-width: 600px) {
-  .passage-text { font-size: 1rem; line-height: 1.75; }
-  .passage-container { padding: 1.25rem 1rem 7rem; }
-  .round-header { padding: 0.75rem 1rem; }
-  .tag-summary { display: none; }
-  .logo { font-size: 2rem; }
-  .end-stats { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-  .end-stat-value { font-size: 1.3rem; }
+  .passage-text { font-size: 1.1rem; }
+  .persona-grid { grid-template-columns: 1fr; }
+  .round-info { flex-direction: column; align-items: flex-start; gap: 5px;}
+  .btn-group-row { flex-direction: column; }
 }
 </style>
 </head>
 <body>
 
+<div class="radar-bg"></div>
+
+<!-- GEMINI LOADING MODAL -->
+<div id="aiLoadingModal" class="modal-overlay">
+  <div class="modal-content" style="text-align: center; border-color: #8b5cf6;">
+    <div class="ai-spinner"></div>
+    <div class="ai-loader" id="aiLoadingText">Establishing secure link to AI Director...</div>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS & DEFINITIONS MODAL -->
+<div id="manualModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-title">Rhetorical Field Manual</div>
+    
+    <p>Before you deploy, make sure you know exactly what you are scanning for. Memorize these definitions:</p>
+    
+    <div class="def-block def-ethos">
+      <div class="def-title">Ethos (Trust & Authority)</div>
+      <div class="def-desc"><strong>What it is:</strong> Establishing credibility or appealing to a shared sense of morality.<br><strong>How to spot it:</strong> Look for the speaker mentioning their titles, years of experience, expertise, or appealing to ethical duties (e.g., "As a doctor with 20 years of experience..." or "It is our moral obligation to...").</div>
+    </div>
+
+    <div class="def-block def-pathos">
+      <div class="def-title">Pathos (Emotion)</div>
+      <div class="def-desc"><strong>What it is:</strong> Appealing to the audience's feelings, desires, or fears.<br><strong>How to spot it:</strong> Look for vivid imagery, emotional anecdotes, words that make you feel angry, sad, or patriotic (e.g., "Think of the innocent children starving in the streets...").</div>
+    </div>
+
+    <div class="def-block def-logos">
+      <div class="def-title">Logos (Logic & Facts)</div>
+      <div class="def-desc"><strong>What it is:</strong> Appealing to reason through evidence and logical structure.<br><strong>How to spot it:</strong> Look for hard statistics, percentages, historical facts, logical "if/then" statements, and citations (e.g., "Studies show a 40% decrease in emissions...").</div>
+    </div>
+
+    <div class="def-block def-fallacy">
+      <div class="def-title">Logical Fallacy (The Glitch)</div>
+      <div class="def-desc"><strong>What it is:</strong> A flaw or trick in reasoning that makes a bad argument look good.<br><strong>How to spot it:</strong> Look for personal attacks (Ad Hominem), extreme exaggerations (Slippery Slope), or distracting from the real issue (Straw Man) (e.g., "If we change the uniform policy, next the school will force us to wear matching haircuts!").</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="closeManual()">Acknowledge</button>
+  </div>
+</div>
+
 <!-- HOME SCREEN -->
 <div id="home" class="screen active">
-  <div class="logo">Rhetoric <span class="logo-accent">Radar</span></div>
-  <p class="subtitle">Sharpen your rhetorical analysis. Identify appeals, spot fallacies, and master the art of persuasion.</p>
-  <div class="instructions-section" style="max-width: 420px; margin: 1.5rem auto 2rem; background: #F1F5F9; padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--ethos);">
-  <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 1rem;">Directions</h3>
-  <ul style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-left: 1.2rem;">
-    <li><strong>You will be given 10 passages</strong> across 4 categories: Political Speeches, Advertisements, Opinion Columns, Debate Arguments</li>
-    <li><strong>Each round you will analyze a passge and identify rhetorical devices:</strong> </li>
-    <li><strong>AP-level rhetoric with:</strong> Layered appeals, nuanced fallacies, multiple tags per sentence</li>
-    <li><strong>6-10 sentencesper passage</li>
-    <li><strong>Scoring:</strong> +10 correct, -5 wrong</li>
-  </ul>
-</div>
+  <div class="logo-container">
+    <div class="logo">Rhetoric<br><span class="logo-accent">Radar</span></div>
+  </div>
+  <p class="subtitle">Draft your analyst persona. Scan the text. Hunt for rhetorical devices. <strong>Learning is a tactical operation.</strong></p>
+  
   <div class="home-card">
     <div class="input-group">
-      <label for="nameInput">Your Name</label>
+      <label for="nameInput">Operative Name</label>
       <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
     </div>
-    <button class="btn btn-primary" onclick="startGame()">Play</button>
-    <div id="statsPreview" class="stats-preview" style="display:none">
-      <h3>Your Stats</h3>
-      <div class="stat-row">
-        <span class="stat-label">High Score</span>
-        <span class="stat-value" id="homeHighScore">0</span>
+
+    <div class="draft-section">
+      <div class="draft-title">Draft Your Persona (Select One)</div>
+      <div class="persona-grid">
+        <div class="persona-card p-ethos" onclick="selectPersona('ethos')">
+          <div class="p-name">The Authority</div>
+          <div class="p-perk">2x Points for Ethos</div>
+        </div>
+        <div class="persona-card p-pathos" onclick="selectPersona('pathos')">
+          <div class="p-name">The Empath</div>
+          <div class="p-perk">2x Points for Pathos</div>
+        </div>
+        <div class="persona-card p-logos" onclick="selectPersona('logos')">
+          <div class="p-name">The Logician</div>
+          <div class="p-perk">2x Points for Logos</div>
+        </div>
+        <div class="persona-card p-fallacy" onclick="selectPersona('fallacy')">
+          <div class="p-name">The Skeptic</div>
+          <div class="p-perk">2x Points for Fallacies</div>
+        </div>
       </div>
-      <div class="stat-row">
-        <span class="stat-label">Games Played</span>
-        <span class="stat-value" id="homeGamesPlayed">0</span>
-      </div>
-      <div class="appeal-bars" id="homeAppealBars"></div>
+    </div>
+
+    <button class="btn btn-primary" onclick="startGame(false)">Initialize Standard Campaign</button>
+    <div class="btn-group-row">
+      <button class="btn btn-secondary" onclick="openManual()">📖 Open Field Manual</button>
+    </div>
+
+    <div class="divider">Advanced Operatives</div>
+    
+    <div class="input-group" style="margin-bottom: 0;">
+      <label for="customTopicInput" style="color: #c4b5fd;">Request Custom Intel (Optional Topic)</label>
+      <input type="text" id="customTopicInput" placeholder="e.g., Space Exploration, Fast Food, AI" style="border-color: #4c1d95;">
+      <button class="btn btn-ai" onclick="startCustomGame()">✨ Intercept Custom Comms</button>
     </div>
   </div>
 </div>
@@ -674,30 +423,26 @@ body {
 <div id="round" class="screen">
   <div class="round-header">
     <div class="round-info">
-      <span class="round-badge" id="roundBadge">Round 1</span>
+      <span class="round-badge" id="roundBadge">Scan 1</span>
+      <span class="clearance-badge" id="clearanceBadge" style="transition: all 0.3s;">Lvl 1</span>
       <span class="round-title" id="roundTitle"></span>
     </div>
-    <span class="round-score" id="roundScore">Score: 0</span>
+    <span class="round-score" id="roundScore">PTS: 0</span>
   </div>
+  
   <div class="passage-container">
     <div class="passage-meta">
       <div class="passage-source" id="passageSource"></div>
-      <div class="passage-instructions">Click any sentence to tag it as <strong>Ethos</strong>, <strong>Pathos</strong>, <strong>Logos</strong>, or <strong>Logical Fallacy</strong>. A sentence can have multiple tags. Tag every sentence you think contains a rhetorical device, then submit.</div>
+      <div class="passage-instructions">Click sentences to tag rhetorical devices. <strong>Hint:</strong> Some sentences have multiple tags. Some have none.</div>
     </div>
     <div class="passage-text" id="passageText"></div>
-    <div class="legend">
-      <span class="legend-item"><span class="legend-dot" style="background:var(--ethos)"></span> Ethos</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--pathos)"></span> Pathos</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--logos)"></span> Logos</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--fallacy)"></span> Fallacy</span>
-    </div>
   </div>
+
   <div class="submit-bar">
-    <div class="tag-summary" id="tagSummary"></div>
-    <button class="btn btn-submit" onclick="submitRound()">Submit Analysis</button>
+    <button class="btn btn-submit" onclick="submitRound()">Run Analysis</button>
   </div>
+
   <div class="tag-picker" id="tagPicker">
-    <div class="tag-picker-title">Tag this sentence</div>
     <button class="tag-option" data-tag="ethos" onclick="toggleTag('ethos')">
       <span class="tag-color" style="background:var(--ethos)"></span> Ethos
       <span class="tag-check"></span>
@@ -720,370 +465,291 @@ body {
 <!-- RESULTS SCREEN -->
 <div id="results" class="screen">
   <div class="results-header">
-    <div class="results-score" id="resultsScore">+0 pts</div>
-    <div class="results-breakdown" id="resultsBreakdown"></div>
+    <div class="rank-stamp" id="resultsRank">S</div>
+    <div class="results-score-anim" id="resultsScore">+0 PTS</div>
+    <div id="promotionBanner" class="promotion-banner promo-success">Clearance Promoted</div>
+    <div id="bonusFeedback" style="color: #fbbf24; font-weight: bold; margin-top: 10px; font-size: 0.9rem; letter-spacing: 0.05em;"></div>
   </div>
+  
   <div class="results-passage">
-    <div class="passage-source" id="resultsSource" style="margin-bottom:1rem"></div>
-    <div class="passage-text" id="resultsText"></div>
-    <div class="legend" style="margin-bottom:1rem">
-      <span class="legend-item"><span class="legend-dot" style="background:var(--logos)"></span> Correct</span>
-      <span class="legend-item"><span class="legend-dot" style="background:var(--fallacy)"></span> Wrong</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#94A3B8"></span> Missed</span>
-    </div>
+    <div class="passage-source" id="resultsSource" style="margin-bottom:2rem"></div>
+    <div id="resultsText"></div>
   </div>
+  
   <div class="results-footer">
-    <button class="btn btn-next" id="nextRoundBtn" onclick="nextRound()">Next Round</button>
+    <button class="btn btn-next" id="nextRoundBtn" onclick="nextRound()">Next Scan</button>
   </div>
 </div>
 
 <!-- END SCREEN -->
 <div id="end" class="screen">
   <div class="end-card">
-    <div class="end-title">Analysis Complete</div>
+    <div class="end-title">Operation Complete</div>
     <div class="end-subtitle" id="endSubtitle"></div>
-    <div class="end-stats">
-      <div class="end-stat">
-        <div class="end-stat-value" id="endTotalScore">0</div>
-        <div class="end-stat-label">Total Score</div>
-      </div>
-      <div class="end-stat">
-        <div class="end-stat-value" id="endAccuracy">0%</div>
-        <div class="end-stat-label">Accuracy</div>
-      </div>
-      <div class="end-stat">
-        <div class="end-stat-value" id="endCorrect">0</div>
-        <div class="end-stat-label">Correct Tags</div>
-      </div>
-      <div class="end-stat">
-        <div class="end-stat-value" id="endRounds">4</div>
-        <div class="end-stat-label">Rounds</div>
-      </div>
-    </div>
-    <div class="end-appeal-breakdown" id="endAppealBreakdown">
-      <h3>Accuracy by Appeal Type</h3>
-    </div>
-    <div class="end-insight" id="endInsight"></div>
-    <div class="end-highscore" id="endHighScore" style="display:none">New High Score!</div>
+    
+    <div class="final-clearance" id="finalClearanceDisplay">Final Clearance: Level 1</div>
+
+    <div class="end-stat-value" id="endTotalScore">0</div>
+    <div class="end-stat-label">Final Score</div>
+    
+    <div id="endInsight" style="color: var(--text-secondary); margin-bottom: 2rem;"></div>
+    
     <button class="btn btn-replay" onclick="replayGame()">Play Again</button>
   </div>
 </div>
 
 <script>
-// ── PASSAGE DATA ──
+/* =====================================================================
+   GEMINI API INTEGRATION
+   ===================================================================== */
+const apiKey = ""; // Set by execution environment
+
+async function callGeminiAPI(userText, systemText, schema = null) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const payload = {
+    contents: [{ parts: [{ text: userText }] }],
+    systemInstruction: { parts: [{ text: systemText }] }
+  };
+  if (schema) {
+    payload.generationConfig = {
+      responseMimeType: "application/json",
+      responseSchema: schema
+    };
+  }
+  
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      return schema ? JSON.parse(text) : text;
+    } catch (e) {
+      if (attempt === 4) throw e;
+      await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+    }
+  }
+}
+
+// Custom Generator Schema
+const interceptSchema = {
+  type: "OBJECT",
+  properties: {
+    title: { type: "STRING" },
+    source: { type: "STRING" },
+    sentences: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: {
+          text: { type: "STRING" },
+          tags: {
+            type: "ARRAY",
+            items: { type: "STRING" },
+            description: "Must be exactly 'ethos', 'pathos', 'logos', or 'fallacy'"
+          }
+        }
+      }
+    }
+  }
+};
+
+async function startCustomGame() {
+  const name = document.getElementById("nameInput").value.trim();
+  let topic = document.getElementById("customTopicInput").value.trim();
+  if (!name || !state.persona) { alert("Please enter your name and draft a persona to begin."); return; }
+  if (!topic) topic = "A completely random controversial or interesting topic";
+
+  document.getElementById("aiLoadingText").textContent = "Intercepting custom comms via AI Director...";
+  document.getElementById("aiLoadingModal").classList.add("active");
+
+  try {
+    const sysPrompt = `You are an AP English Language teacher. Create a rhetorical analysis exercise.
+    Generate a 4-sentence passage about: ${topic}.
+    Each sentence must contain 0, 1, or 2 rhetorical devices from this exact list: ["ethos", "pathos", "logos", "fallacy"].
+    Make the passage engaging, realistic, and at a high-school AP reading level.`;
+    
+    const customPassage = await callGeminiAPI("Generate the passage.", sysPrompt, interceptSchema);
+    
+    // Ensure data safety
+    customPassage.difficulty = 1;
+    customPassage.sentences.forEach(s => {
+      s.tags = s.tags.map(t => t.toLowerCase()).filter(t => ['ethos','pathos','logos','fallacy'].includes(t));
+      // Custom mode doesn't have hardcoded 'exp' by default, so we leave it empty. AI Debrief will cover it.
+    });
+
+    state.playerName = name;
+    state.currentRound = 0;
+    state.totalScore = 0;
+    state.clearanceLevel = "Custom";
+    state.isCustomMode = true;
+    state.roundPassages = [customPassage];
+
+    document.getElementById("aiLoadingModal").classList.remove("active");
+    loadRound();
+
+  } catch (error) {
+    document.getElementById("aiLoadingModal").classList.remove("active");
+    alert("The AI Director failed to intercept the signal. Please try again.");
+    console.error(error);
+  }
+}
+
+// AI Debrief (Explanation for Custom Mode)
+async function requestAIDebrief(sentenceIdx, btnElement) {
+  const res = state.lastResults[sentenceIdx];
+  const boxId = `ai-exp-${sentenceIdx}`;
+  const box = document.getElementById(boxId);
+  
+  btnElement.textContent = "Analyzing...";
+  btnElement.disabled = true;
+
+  try {
+    const sysText = `You are an encouraging AP English tutor. The user is playing a rhetorical analysis game.
+    Sentence: "${res.text}"
+    Correct Tags (by the expert): [${res.correct.join(', ')}]
+    Student Guessed: [${res.player.join(', ')}]
+    
+    In 2 or 3 brief sentences, explain WHY the expert tags are correct. If the student guessed wrong, gently correct their misconception. Use simple, engaging language.`;
+    
+    const explanation = await callGeminiAPI("Analyze this sentence.", sysText);
+    
+    box.innerHTML = `<strong>✨ AI Director:</strong> ${explanation}`;
+    box.style.display = "block";
+    btnElement.style.display = "none";
+  } catch (e) {
+    btnElement.textContent = "Signal Lost. Try Again.";
+    btnElement.disabled = false;
+  }
+}
+
+// ── MODAL LOGIC ──
+function openManual() { document.getElementById('manualModal').classList.add('active'); }
+function closeManual() { document.getElementById('manualModal').classList.remove('active'); }
+
+// ── PROGRESSIVE PASSAGE DATA (WITH HARDCODED EXPLANATIONS) ──
 const PASSAGES = [
-  // ── POLITICAL SPEECHES ──
-  {
-    id: "speech1",
-    title: "Campaign Rally Address",
-    source: "Excerpt from a gubernatorial campaign speech, 2024",
-    difficulty: 1,
-    category: "speech",
+  { 
+    id: "level1", title: "Campaign Rally Address", source: "> INTERCEPTED: Gubernatorial campaign speech, 2024", difficulty: 1, 
     sentences: [
-      { text: "As a veteran of twenty years in public service and a former prosecutor who put corrupt officials behind bars, I understand the weight of the office I'm seeking.", tags: ["ethos"] },
-      { text: "Every night, families in this state sit around kitchen tables wondering whether they can afford groceries next week — mothers skipping meals so their children can eat.", tags: ["pathos"] },
-      { text: "State spending on education has dropped 14 percent in real dollars over the past decade, while administrative overhead has increased by 23 percent.", tags: ["logos"] },
-      { text: "My opponent claims to care about schools, but she sends her own children to a private academy — how can she possibly understand public education?", tags: ["fallacy"] },
-      { text: "When I served as district attorney, we recovered $4.2 million in misused public funds and redirected every cent to underfunded school districts.", tags: ["ethos", "logos"] },
-      { text: "I've walked through classrooms where children share textbooks that are older than they are, and I've looked into the eyes of teachers who buy supplies with their own paychecks.", tags: ["pathos", "ethos"] },
-      { text: "If we don't act now, within five years we will have an entire generation unprepared for the modern workforce, and our economy will collapse under the weight of an unskilled labor pool.", tags: ["logos", "fallacy"] },
-      { text: "The choice is simple: invest in our future or abandon it.", tags: ["fallacy"] },
-      { text: "Together, we rebuilt this district from the ground up once before, and I give you my word — we will do it again.", tags: ["ethos", "pathos"] }
+      { text: "As a veteran of twenty years in public service, I understand the heavy weight of the office I'm seeking.", tags: ["ethos"], exp: "Ethos: The speaker establishes credibility by mentioning their 'twenty years in public service'." },
+      { text: "Every night, families in this state sit around kitchen tables wondering whether they can afford groceries next week.", tags: ["pathos"], exp: "Pathos: Evokes sympathy and fear by painting an emotional picture of struggling families." },
+      { text: "My opponent claims to care about public schools, but she sends her own children to a private academy.", tags: ["fallacy"], exp: "Fallacy: This is an Ad Hominem attack—attacking the opponent's personal choices rather than their actual policies." }
     ]
   },
-  {
-    id: "speech2",
-    title: "Congressional Floor Remarks on Healthcare",
-    source: "Adapted from congressional remarks on healthcare policy, 2025",
-    difficulty: 2,
-    category: "speech",
+  { 
+    id: "level2", title: "EV Launch Campaign", source: "> INTERCEPTED: Volta Motors EV ad copy, 2025", difficulty: 2, 
     sentences: [
-      { text: "I rise today not as a partisan but as a physician who spent seventeen years in emergency medicine, treating patients who delayed care because they couldn't afford it.", tags: ["ethos", "pathos"] },
-      { text: "Last year alone, 68,000 Americans died from conditions that are fully treatable when caught early — a mortality rate three times higher than in comparable nations.", tags: ["logos"] },
-      { text: "I held the hand of a woman named Maria as she learned that her treatable cancer had become terminal because she had rationed her diagnostic visits to save money.", tags: ["pathos"] },
-      { text: "Those who oppose this bill want you to believe that expanding coverage means sacrificing quality, but the data from every industrialized nation contradicts that claim.", tags: ["fallacy", "logos"] },
-      { text: "The nonpartisan Congressional Budget Office projects that this legislation would reduce emergency room spending by $12 billion annually while extending coverage to 8 million uninsured adults.", tags: ["logos"] },
-      { text: "As someone who has sworn a Hippocratic oath, I cannot in good conscience stand by while a fixable system continues to fail the people who trust us to protect them.", tags: ["ethos", "pathos"] },
-      { text: "Every major medical association in this country — the AMA, the ANA, the AHA — has endorsed this framework because the evidence is overwhelming.", tags: ["ethos", "logos"] },
-      { text: "If we reject this bill, we are telling Maria and millions like her that their lives are simply not worth the investment.", tags: ["pathos", "fallacy"] }
+      { text: "Engineered by the exact team that designed propulsion systems for NASA's Mars missions, the Volta Aeon is a marvel.", tags: ["ethos"], exp: "Ethos: Borrows massive authority by associating the product with NASA engineers." },
+      { text: "With a 487-mile range on a single charge, it outperforms every gasoline sedan in its class by measurable margins.", tags: ["logos"], exp: "Logos: Uses hard numbers (487-mile range) to logically prove the car's superiority." },
+      { text: "If we don't switch to electric cars today, the entire planet will be uninhabitable by the time your children graduate high school.", tags: ["pathos", "fallacy"], exp: "Pathos & Fallacy: It uses extreme fear (Pathos) while committing a Slippery Slope fallacy (exaggerating the immediate consequences)." },
+      { text: "The choice is simple: buy the Aeon, or admit you don't care about the environment.", tags: ["fallacy"], exp: "Fallacy: A False Dilemma (either/or fallacy). It incorrectly presents buying this specific car as the only way to care about the environment." }
     ]
   },
-  // ── ADVERTISEMENTS / MARKETING ──
-  {
-    id: "ad1",
-    title: "Electric Vehicle Launch Campaign",
-    source: "Marketing copy for Volta Motors EV launch, 2025",
-    difficulty: 1,
-    category: "advertisement",
+  { 
+    id: "level3", title: "Op-Ed: Social Media in Schools", source: "> INTERCEPTED: Opinion column, The Atlantic, 2025", difficulty: 3, 
     sentences: [
-      { text: "Engineered by the team that designed propulsion systems for NASA's Mars missions, the Volta Aeon represents a new chapter in automotive engineering.", tags: ["ethos"] },
-      { text: "Imagine pulling into your driveway after a long day, the cabin silent except for the sound of your favorite song, knowing you haven't burned a single drop of fuel.", tags: ["pathos"] },
-      { text: "With a 487-mile range on a single charge and 0-to-60 acceleration in 2.8 seconds, the Aeon outperforms every gasoline sedan in its class by measurable margins.", tags: ["logos"] },
-      { text: "Every other automaker is playing catch-up — choosing any competitor is choosing yesterday's technology.", tags: ["fallacy"] },
-      { text: "Over 120,000 families have already pre-ordered, joining a movement that's bigger than any single car company.", tags: ["ethos", "pathos"] },
-      { text: "Independent testing by Consumer Reports awarded the Aeon a 97 out of 100, the highest score ever given to a production vehicle.", tags: ["logos", "ethos"] },
-      { text: "You wouldn't feed your children processed food from 1990 — so why would you trust their lungs to an engine designed in the same era?", tags: ["pathos", "fallacy"] },
-      { text: "The average Aeon owner saves $3,200 per year on fuel and maintenance costs compared to a equivalent gasoline vehicle, based on EPA estimates and manufacturer service records.", tags: ["logos"] }
+      { text: "As a high school principal for fifteen years, I've watched this mental health crisis transform adolescence from the front lines.", tags: ["ethos"], exp: "Ethos: The author establishes firsthand authority by stating their 15-year career as a principal." },
+      { text: "Teen depression rates have risen 63 percent since 2010, mirroring the exact adoption curve of smartphones.", tags: ["logos"], exp: "Logos: Relies on specific statistical data (63 percent) and correlation to make a logical point." },
+      { text: "I've sat across from a fourteen-year-old girl who carved anonymous posts into her skin, and that conversation will haunt me forever.", tags: ["pathos"], exp: "Pathos: A highly disturbing, deeply emotional anecdote designed to make the reader feel horrified and sympathetic." },
+      { text: "Anyone who opposes a school phone ban is essentially saying they value Silicon Valley profits over children's wellbeing.", tags: ["fallacy"], exp: "Fallacy: A Straw Man argument. It misrepresents the opponents' actual views to make them easier to attack." },
+      { text: "We must restrict these devices immediately; the data from European schools proves that test scores rise when screens are removed.", tags: ["logos"], exp: "Logos: Supports the claim by pointing to observable, logical outcomes (data/test scores) from other regions." }
     ]
   },
-  {
-    id: "ad2",
-    title: "Mental Health App Campaign",
-    source: "Brand campaign for Stillpoint wellness app, 2025",
-    difficulty: 2,
-    category: "advertisement",
+  { 
+    id: "level4", title: "Academic Debate: Basic Income", source: "> INTERCEPTED: Policy debate final, 2025", difficulty: 4, 
     sentences: [
-      { text: "Developed in partnership with clinical psychologists from Johns Hopkins and Stanford, Stillpoint brings evidence-based therapy techniques to your phone.", tags: ["ethos"] },
-      { text: "You know that hollow feeling at 2 a.m. when the world is asleep but your mind refuses to stop — the racing thoughts, the tightness in your chest, the loneliness of it.", tags: ["pathos"] },
-      { text: "In a randomized controlled trial of 4,300 participants, users who completed Stillpoint's 8-week program reported a 41 percent reduction in generalized anxiety symptoms.", tags: ["logos"] },
-      { text: "People who don't invest in their mental health now will inevitably face a complete breakdown later — it's only a matter of time.", tags: ["fallacy", "pathos"] },
-      { text: "Traditional therapy costs an average of $150 per session; Stillpoint delivers comparable guided interventions for less than $1 per day.", tags: ["logos"] },
-      { text: "Over three million people have already taken the first step — their courage is proof that asking for help is not weakness but wisdom.", tags: ["pathos", "ethos"] },
-      { text: "Dr. Amara Chen, former president of the American Psychological Association, calls Stillpoint 'the most significant democratization of mental healthcare in a generation.'", tags: ["ethos"] },
-      { text: "Every minute you wait is another minute spent suffering unnecessarily — download Stillpoint today and feel the difference by tonight.", tags: ["pathos", "fallacy"] }
-    ]
-  },
-  // ── OPINION COLUMNS ──
-  {
-    id: "opinion1",
-    title: "Op-Ed: The Case Against Social Media in Schools",
-    source: "Opinion column, The Atlantic, 2025",
-    difficulty: 2,
-    category: "opinion",
-    sentences: [
-      { text: "As a high school principal for fifteen years and the parent of three teenagers, I've watched social media transform adolescence from the front lines.", tags: ["ethos"] },
-      { text: "Teen depression rates have risen 63 percent since 2010, a trajectory that precisely mirrors the adoption curve of smartphone-based social platforms.", tags: ["logos"] },
-      { text: "I've sat across from a fourteen-year-old girl who carved words from anonymous posts into her own skin because she believed every syllable, and that conversation will haunt me for the rest of my life.", tags: ["pathos"] },
-      { text: "Critics will argue that technology is neutral, but a tool specifically engineered to exploit dopamine responses and maximize engagement time is no more neutral than a slot machine.", tags: ["logos", "fallacy"] },
-      { text: "Meta's own internal research, leaked by a whistleblower in 2021, concluded that Instagram makes body image issues worse for one in three teenage girls — their words, not mine.", tags: ["logos", "ethos"] },
-      { text: "Anyone who opposes a school phone ban is essentially saying they value Silicon Valley profits over children's wellbeing.", tags: ["fallacy"] },
-      { text: "Schools in France, the Netherlands, and Australia have implemented device restrictions and seen measurable improvements in attention spans, test scores, and reported student happiness.", tags: ["logos"] },
-      { text: "We wouldn't allow a corporation to set up a casino in the school cafeteria, yet we let algorithms with the same addictive architecture occupy every waking moment of our students' attention.", tags: ["pathos", "logos"] },
-      { text: "The question isn't whether we can afford to restrict phones in schools — it's whether we can afford not to, before we lose another generation to the scroll.", tags: ["pathos", "fallacy"] }
-    ]
-  },
-  {
-    id: "opinion2",
-    title: "Op-Ed: Why AI Regulation Will Backfire",
-    source: "Opinion column, Wired, 2025",
-    difficulty: 3,
-    category: "opinion",
-    sentences: [
-      { text: "I've spent two decades building AI systems at three of the world's leading research labs, and I can tell you with certainty: the current regulatory proposals fundamentally misunderstand how this technology works.", tags: ["ethos"] },
-      { text: "The EU's AI Act has already caused fourteen startups to relocate outside Europe, taking with them over $2 billion in projected economic output and roughly 3,000 high-skill jobs.", tags: ["logos"] },
-      { text: "Regulating AI now is like trying to write traffic laws in 1905 — you'll end up banning left turns instead of requiring seatbelts.", tags: ["pathos", "fallacy"] },
-      { text: "Every previous wave of transformative technology — electricity, aviation, the internet — produced its greatest societal benefits only after regulators stepped back and allowed experimentation.", tags: ["logos", "fallacy"] },
-      { text: "The researchers I work with are not reckless disruptors; they are people who chose modest academic salaries over tech fortunes because they believe in building AI that serves humanity.", tags: ["ethos", "pathos"] },
-      { text: "China is investing $15 billion annually in unrestricted AI development; if we hamstring our own researchers with compliance paperwork, we are handing technological supremacy to an authoritarian regime.", tags: ["logos", "fallacy"] },
-      { text: "Those who support heavy regulation have never built a model, never debugged a training run at 3 a.m., and never had to explain to a patient that an AI-detected tumor saved their life.", tags: ["fallacy", "pathos"] },
-      { text: "A study from MIT's Computer Science and Artificial Intelligence Laboratory found that AI diagnostic tools reduced misdiagnosis rates by 34 percent across twelve hospital systems.", tags: ["logos"] },
-      { text: "We should absolutely establish ethical guardrails, but the current proposals amount to locking the lab door and pretending the science will wait — it won't, and the cost of hesitation is measured in lives.", tags: ["pathos", "logos"] }
-    ]
-  },
-  // ── DEBATE / ACADEMIC ARGUMENTS ──
-  {
-    id: "debate1",
-    title: "Policy Debate: Universal Basic Income",
-    source: "Adapted from a university policy debate final, 2025",
-    difficulty: 3,
-    category: "debate",
-    sentences: [
-      { text: "As economics faculty who have collectively published over two hundred peer-reviewed studies on welfare systems, our research team has spent four years modeling UBI outcomes across diverse economies.", tags: ["ethos"] },
-      { text: "The Stockton Economic Empowerment Demonstration gave 125 residents $500 per month for two years; full-time employment among recipients rose 12 percentage points compared to the control group.", tags: ["logos"] },
-      { text: "Without UBI, automation will create a permanent underclass of displaced workers with no path to retraining and no safety net — we will witness the unraveling of the social contract within a decade.", tags: ["pathos", "fallacy"] },
-      { text: "Finland's two-year basic income experiment found that recipients reported significantly higher life satisfaction and trust in institutions, with no statistically significant decrease in employment.", tags: ["logos"] },
-      { text: "Opponents claim UBI will make people lazy, but this argument reduces complex human motivation to a cartoon — centuries of economic research demonstrate that people seek purpose, status, and social connection beyond mere survival.", tags: ["fallacy", "logos"] },
-      { text: "Consider the single mother working two jobs who still can't afford after-school care — her children come home to an empty apartment every day, and her exhaustion compounds across generations.", tags: ["pathos"] },
-      { text: "A UBI set at the federal poverty line of $15,060 per adult would cost approximately $3.8 trillion annually, but when offset by consolidating existing welfare programs and projected economic stimulus effects, net additional spending falls to roughly $1.4 trillion.", tags: ["logos"] },
-      { text: "Every dollar invested in poverty reduction returns between $7 and $12 in reduced healthcare costs, lower incarceration rates, and increased tax revenue, according to a meta-analysis of forty-six longitudinal studies.", tags: ["logos"] },
-      { text: "If we can find $850 billion annually for defense spending, the claim that we 'can't afford' to ensure no citizen lives in poverty is not an economic argument — it is a moral one.", tags: ["pathos", "logos", "fallacy"] }
-    ]
-  },
-  {
-    id: "debate2",
-    title: "Academic Debate: Abolishing Standardized Testing",
-    source: "Adapted from a national forensics tournament semifinal, 2025",
-    difficulty: 3,
-    category: "debate",
-    sentences: [
-      { text: "Having served on the College Board's own equity review committee and having analyzed testing data from over 1,200 school districts, I bring both institutional knowledge and statistical rigor to this argument.", tags: ["ethos"] },
-      { text: "SAT scores correlate more strongly with family income — at r = 0.42 — than with any measure of academic aptitude, and this correlation has strengthened, not weakened, over the past twenty years despite repeated test redesigns.", tags: ["logos"] },
-      { text: "Behind every percentile ranking is a seventeen-year-old whose future is being compressed into a four-hour window — a student who might be brilliant in a lab, transformative in a classroom discussion, but paralyzed by the artificial pressure of a timed bubble sheet.", tags: ["pathos"] },
-      { text: "Defenders of the SAT say it provides an 'objective standard,' but any instrument that systematically advantages students who can afford $200-per-hour tutoring is measuring wealth, not merit.", tags: ["logos", "fallacy"] },
-      { text: "The University of California system, encompassing nine research universities and 280,000 students, went test-optional and found that high school GPA alone predicted college success more accurately than any combination of GPA and test scores.", tags: ["logos", "ethos"] },
-      { text: "Those who want to keep standardized tests are simply protecting a $1.7 billion testing industry that profits from student anxiety.", tags: ["fallacy"] },
-      { text: "A longitudinal study tracking 55,000 students across thirty universities found zero statistically significant difference in graduation rates or GPA between students admitted with and without test scores.", tags: ["logos"] },
-      { text: "When we reduce a student's worth to a number, we teach them that conformity is more valuable than creativity, that speed matters more than depth, and that their unique gifts are irrelevant unless they fit inside a Scantron oval.", tags: ["pathos"] },
-      { text: "If standardized tests truly measured potential, the demographics of elite universities would mirror the demographics of the nation — they do not, and the gap is widening.", tags: ["logos", "fallacy"] }
-    ]
-  },
-  {
-    id: "ad3",
-    title: "Public Service Announcement: Climate Action",
-    source: "National environmental coalition PSA, 2025",
-    difficulty: 2,
-    category: "advertisement",
-    sentences: [
-      { text: "This message is endorsed by the National Oceanic and Atmospheric Administration, NASA's Goddard Institute, and over 15,000 climate scientists who have signed the World Scientists' Warning to Humanity.", tags: ["ethos"] },
-      { text: "Your grandchildren will not ask what political party you belonged to — they will ask what you did when you still had time to act.", tags: ["pathos"] },
-      { text: "Global average temperatures have risen 1.2°C since pre-industrial levels, and current emission trajectories project a 2.7°C increase by 2100, which would trigger irreversible feedback loops in polar ice systems.", tags: ["logos"] },
-      { text: "Switching to renewable energy would create 24 million new jobs globally by 2030 while eliminating 6 million fossil fuel positions, resulting in a net gain of 18 million jobs, according to the International Renewable Energy Agency.", tags: ["logos"] },
-      { text: "People who refuse to change their habits are personally responsible for the droughts, wildfires, and hurricanes devastating communities right now.", tags: ["fallacy", "pathos"] },
-      { text: "In Miami, homeowners are already watching the ocean swallow their front yards — not in some distant future, but this year, during king tides that now flood streets that were dry five years ago.", tags: ["pathos", "logos"] },
-      { text: "Every nation that has invested heavily in green infrastructure — Denmark, Costa Rica, Scotland — has seen economic growth accelerate, not stall.", tags: ["logos"] },
-      { text: "Either we transition to clean energy within this decade, or we accept a future of permanent ecological collapse — there is no middle path.", tags: ["fallacy"] }
-    ]
-  },
-  {
-    id: "speech3",
-    title: "Commencement Address at a Historically Black University",
-    source: "Adapted from a 2025 HBCU commencement address",
-    difficulty: 2,
-    category: "speech",
-    sentences: [
-      { text: "I stand before you today as the granddaughter of sharecroppers who could not read, the daughter of a factory worker who never missed a shift, and a woman who earned her doctorate from this very institution thirty years ago.", tags: ["ethos", "pathos"] },
-      { text: "This university has produced more Black physicians, engineers, and educators than any Ivy League school — that is not sentiment, that is a fact documented by the National Science Foundation.", tags: ["logos", "ethos"] },
-      { text: "The world will try to reduce you to a statistic, a demographic checkbox, a line item in someone else's diversity report — and you must refuse that reduction with every fiber of your being.", tags: ["pathos"] },
-      { text: "Graduates of HBCUs earn 56 percent more over their lifetimes than Black students from comparable predominantly white institutions, when controlling for socioeconomic background and field of study.", tags: ["logos"] },
-      { text: "Anyone who questions the relevance of these institutions in 2025 is either ignorant of the data or indifferent to the communities they serve.", tags: ["fallacy", "ethos"] },
-      { text: "You carry with you not just a degree but the accumulated sacrifice of generations who were denied the education you have earned — their dreams live in your diplomas.", tags: ["pathos"] },
-      { text: "I built my first company with $800, a library card, and the network of mentors this campus gave me — and today that company employs 2,400 people in twelve states.", tags: ["ethos", "logos"] },
-      { text: "The path forward requires both the rigorous training you've received here and the moral courage to use it in service of something larger than your own ambition.", tags: ["pathos", "ethos"] }
+      { text: "Our research team has spent four years at Stanford modeling Universal Basic Income outcomes across diverse economies.", tags: ["ethos"], exp: "Ethos: Mentions a prestigious institution (Stanford) and extensive research time to build trust." },
+      { text: "When Stockton gave residents $500 per month, full-time employment among recipients actually rose by 12 percentage points.", tags: ["logos"], exp: "Logos: Uses an empirical case study and specific percentages to counter an assumption." },
+      { text: "Consider the single mother working two jobs who still can't afford after-school care; her children come home to an empty apartment every single day.", tags: ["pathos"], exp: "Pathos: Creates a relatable, heartbreaking hypothetical scenario to evoke pity." },
+      { text: "If we provide a basic income, nobody will ever want to work again, factories will shut down, and the entire global supply chain will collapse.", tags: ["fallacy"], exp: "Fallacy: A massive Slippery Slope argument that jumps to an extreme, unjustified conclusion." },
+      { text: "A UBI set at $15,000 would cost $3.8 trillion, but when offset by consolidating existing welfare, net spending falls to $1.4 trillion.", tags: ["logos"], exp: "Logos: A dense, mathematically sound breakdown of costs and offsets." },
+      { text: "If we can find $850 billion for defense spending to bomb other countries, we can afford to feed our own starving citizens.", tags: ["pathos", "fallacy"], exp: "Pathos & Fallacy: Evokes strong emotion ('starving citizens') while using a Red Herring (distracting with defense spending) to make a moral, rather than economic, point." }
     ]
   }
+];
+
+const CLEARANCE_TITLES = [
+  "Level 1: Rookie Analyst",
+  "Level 2: Field Operative",
+  "Level 3: Lead Interceptor",
+  "Level 4: Master Operative"
 ];
 
 // ── GAME STATE ──
 let state = {
   playerName: "",
+  persona: "",
   currentRound: 0,
+  clearanceLevel: 1,
   totalScore: 0,
-  totalCorrect: 0,
-  totalWrong: 0,
-  totalMissed: 0,
   roundPassages: [],
   playerTags: {},
-  sessionAppealStats: { ethos: {c:0,t:0}, pathos: {c:0,t:0}, logos: {c:0,t:0}, fallacy: {c:0,t:0} },
-  selectedSentenceIdx: null
+  selectedSentenceIdx: null,
+  isCustomMode: false,
+  lastResults: []
 };
 
-// ── STORAGE ──
-function loadStats() {
-  try {
-    return JSON.parse(localStorage.getItem("rhetoricRadar_stats")) || null;
-  } catch { return null; }
+// ── INIT & HOME ──
+function selectPersona(type) {
+  state.persona = type;
+  document.querySelectorAll('.persona-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.p-${type}`).classList.add('selected');
 }
 
-function saveStats(stats) {
-  localStorage.setItem("rhetoricRadar_stats", JSON.stringify(stats));
-}
-
-function getHighScore() {
-  return parseInt(localStorage.getItem("rhetoricRadar_highScore") || "0", 10);
-}
-
-function setHighScore(s) {
-  localStorage.setItem("rhetoricRadar_highScore", String(s));
-}
-
-function getGamesPlayed() {
-  return parseInt(localStorage.getItem("rhetoricRadar_gamesPlayed") || "0", 10);
-}
-
-function incGamesPlayed() {
-  localStorage.setItem("rhetoricRadar_gamesPlayed", String(getGamesPlayed() + 1));
-}
-
-function getSavedName() {
-  return localStorage.getItem("rhetoricRadar_name") || "";
-}
-
-function saveName(n) {
-  localStorage.setItem("rhetoricRadar_name", n);
-}
-
-// ── INIT ──
-function init() {
-  const name = getSavedName();
-  if (name) {
-    document.getElementById("nameInput").value = name;
-  }
-  showHomeStats();
-}
-
-function showHomeStats() {
-  const stats = loadStats();
-  const hs = getHighScore();
-  const gp = getGamesPlayed();
-  if (gp === 0 && hs === 0) {
-    document.getElementById("statsPreview").style.display = "none";
+function startGame(isCustom) {
+  const name = document.getElementById("nameInput").value.trim();
+  if (!name || !state.persona) {
+    alert("Please enter your name and draft a persona to begin.");
     return;
   }
-  document.getElementById("statsPreview").style.display = "";
-  document.getElementById("homeHighScore").textContent = hs;
-  document.getElementById("homeGamesPlayed").textContent = gp;
-
-  const barsEl = document.getElementById("homeAppealBars");
-  barsEl.innerHTML = "";
-  if (stats) {
-    const colors = { ethos: "var(--ethos)", pathos: "var(--pathos)", logos: "var(--logos)", fallacy: "var(--fallacy)" };
-    const labels = { ethos: "Ethos", pathos: "Pathos", logos: "Logos", fallacy: "Fallacy" };
-    for (const key of ["ethos", "pathos", "logos", "fallacy"]) {
-      const s = stats[key] || {c:0,t:0};
-      const pct = s.t > 0 ? Math.round(100 * s.c / s.t) : 0;
-      barsEl.innerHTML += `<div class="appeal-bar-row">
-        <span class="appeal-bar-label" style="color:${colors[key]}">${labels[key]}</span>
-        <div class="appeal-bar-track"><div class="appeal-bar-fill" style="width:${pct}%;background:${colors[key]}"></div></div>
-        <span class="appeal-bar-pct">${pct}%</span>
-      </div>`;
-    }
-  }
+  
+  state.playerName = name;
+  state.currentRound = 0;
+  state.totalScore = 0;
+  state.clearanceLevel = 1;
+  state.isCustomMode = false;
+  
+  state.roundPassages = [...PASSAGES].sort((a, b) => a.difficulty - b.difficulty);
+  loadRound();
 }
 
-// ── NAVIGATION ──
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   window.scrollTo(0, 0);
 }
 
-// ── GAME FLOW ──
-function startGame() {
-  const name = document.getElementById("nameInput").value.trim();
-  if (!name) {
-    document.getElementById("nameInput").focus();
-    document.getElementById("nameInput").style.borderColor = "var(--fallacy)";
-    setTimeout(() => document.getElementById("nameInput").style.borderColor = "", 1500);
-    return;
-  }
-  state.playerName = name;
-  saveName(name);
-  state.currentRound = 0;
-  state.totalScore = 0;
-  state.totalCorrect = 0;
-  state.totalWrong = 0;
-  state.totalMissed = 0;
-  state.sessionAppealStats = { ethos:{c:0,t:0}, pathos:{c:0,t:0}, logos:{c:0,t:0}, fallacy:{c:0,t:0} };
-
-  // Select 4 random passages, sorted by difficulty
-  const shuffled = [...PASSAGES].sort(() => Math.random() - 0.5);
-  state.roundPassages = shuffled.slice(0, 4).sort((a, b) => a.difficulty - b.difficulty);
-
-  loadRound();
-}
-
+// ── ROUND LOGIC ──
 function loadRound() {
   const passage = state.roundPassages[state.currentRound];
   state.playerTags = {};
   state.selectedSentenceIdx = null;
 
-  document.getElementById("roundBadge").textContent = `Round ${state.currentRound + 1}`;
+  document.getElementById("roundBadge").textContent = `SCAN 0${state.currentRound + 1}`;
+  
+  const cBadge = document.getElementById("clearanceBadge");
+  if(state.isCustomMode) {
+    cBadge.textContent = `CUSTOM INTEL`;
+    cBadge.style.borderColor = "#c4b5fd";
+    cBadge.style.color = "#c4b5fd";
+    cBadge.style.background = "rgba(139, 92, 246, 0.15)";
+  } else {
+    cBadge.textContent = `LVL ${state.clearanceLevel}`;
+    cBadge.style.borderColor = "var(--logos)";
+    cBadge.style.color = "var(--logos)";
+    cBadge.style.background = "rgba(74, 222, 128, 0.15)";
+  }
+
   document.getElementById("roundTitle").textContent = passage.title;
-  document.getElementById("roundScore").textContent = `Score: ${state.totalScore}`;
+  document.getElementById("roundScore").textContent = `PTS: ${state.totalScore}`;
   document.getElementById("passageSource").textContent = passage.source;
 
   renderPassage(passage);
-  updateTagSummary();
   hideTagPicker();
   showScreen("round");
 }
@@ -1106,16 +772,12 @@ function renderPassage(passage) {
 
 function selectSentence(idx, el) {
   state.selectedSentenceIdx = idx;
-
   document.querySelectorAll(".sentence").forEach(s => s.style.outline = "");
-  el.style.outline = "2px solid var(--ethos)";
-  el.style.outlineOffset = "2px";
-
-  // Position tag picker near the sentence
+  el.style.outline = "2px solid #fff";
+  
   const picker = document.getElementById("tagPicker");
   const rect = el.getBoundingClientRect();
-
-  // Update check marks
+  
   const tags = state.playerTags[idx] || [];
   picker.querySelectorAll(".tag-option").forEach(opt => {
     const t = opt.dataset.tag;
@@ -1125,23 +787,11 @@ function selectSentence(idx, el) {
   });
 
   picker.classList.add("visible");
-
-  // Position after making visible so we can measure
-  const pickerH = picker.offsetHeight;
-  const pickerW = picker.offsetWidth;
+  
   let top = rect.bottom + window.scrollY + 8;
   let left = rect.left;
-
-  // Keep within viewport
-  if (left + pickerW > window.innerWidth - 16) left = window.innerWidth - pickerW - 16;
-  if (left < 8) left = 8;
-
-  // If below viewport, show above
-  if (rect.bottom + pickerH + 16 > window.innerHeight) {
-    top = rect.top + window.scrollY - pickerH - 8;
-  }
-
-  picker.style.position = "absolute";
+  if (left + 250 > window.innerWidth) left = window.innerWidth - 270;
+  
   picker.style.top = top + "px";
   picker.style.left = left + "px";
 }
@@ -1159,19 +809,18 @@ function toggleTag(tag) {
   if (!state.playerTags[idx]) state.playerTags[idx] = [];
   const arr = state.playerTags[idx];
   const pos = arr.indexOf(tag);
+  
   if (pos >= 0) arr.splice(pos, 1);
   else arr.push(tag);
 
   if (arr.length === 0) delete state.playerTags[idx];
 
-  // Update UI
   const opt = document.querySelector(`.tag-option[data-tag="${tag}"]`);
-  const isNowSelected = arr && arr.includes(tag);
+  const isNowSelected = arr.includes(tag);
   opt.classList.toggle("selected", isNowSelected);
   opt.querySelector(".tag-check").textContent = isNowSelected ? "✓" : "";
 
   updateSentenceVisuals();
-  updateTagSummary();
 }
 
 function updateSentenceVisuals() {
@@ -1180,7 +829,6 @@ function updateSentenceVisuals() {
     const idx = parseInt(span.dataset.idx);
     const tags = state.playerTags[idx] || [];
 
-    // Remove old indicators
     const oldIndicators = span.querySelector(".tag-indicators");
     if (oldIndicators) oldIndicators.remove();
 
@@ -1192,45 +840,18 @@ function updateSentenceVisuals() {
         const dot = document.createElement("span");
         dot.className = "tag-dot";
         dot.style.background = colors[t];
+        dot.style.color = colors[t];
         indicators.appendChild(dot);
       });
       span.appendChild(indicators);
-
-      // Multi-color bottom border
-      if (tags.length === 1) {
-        span.style.borderBottomColor = colors[tags[0]];
-      } else {
-        const gradStops = tags.map((t, i) => {
-          const start = (i / tags.length * 100).toFixed(1);
-          const end = ((i + 1) / tags.length * 100).toFixed(1);
-          return `${colors[t]} ${start}%, ${colors[t]} ${end}%`;
-        }).join(", ");
-        span.style.borderImage = `linear-gradient(to right, ${gradStops}) 1`;
-      }
+      span.style.borderBottomColor = colors[tags[0]];
     } else {
       span.classList.remove("tagged");
       span.style.borderBottomColor = "transparent";
-      span.style.borderImage = "";
     }
   });
 }
 
-function updateTagSummary() {
-  const counts = { ethos: 0, pathos: 0, logos: 0, fallacy: 0 };
-  const colors = { ethos: "var(--ethos)", pathos: "var(--pathos)", logos: "var(--logos)", fallacy: "var(--fallacy)" };
-  const labels = { ethos: "Ethos", pathos: "Pathos", logos: "Logos", fallacy: "Fallacy" };
-
-  for (const tags of Object.values(state.playerTags)) {
-    for (const t of tags) counts[t]++;
-  }
-
-  const el = document.getElementById("tagSummary");
-  el.innerHTML = Object.entries(counts).map(([k, v]) =>
-    `<span class="tag-count-chip"><span class="tag-count-dot" style="background:${colors[k]}"></span>${labels[k]}: ${v}</span>`
-  ).join("");
-}
-
-// Close picker on outside click
 document.addEventListener("click", (e) => {
   const picker = document.getElementById("tagPicker");
   if (picker.classList.contains("visible") && !picker.contains(e.target) && !e.target.closest(".sentence")) {
@@ -1238,10 +859,14 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// ── SCORING ──
+// ── GAMIFIED SCORING & PROMOTION ──
 function submitRound() {
   const passage = state.roundPassages[state.currentRound];
-  let roundCorrect = 0, roundWrong = 0, roundMissed = 0, roundScore = 0;
+  let roundScore = 0;
+  let totalPossibleTags = 0;
+  let totalCorrectTags = 0;
+  let personaBonuses = 0;
+  let perfectSentences = 0;
 
   const sentenceResults = passage.sentences.map((s, i) => {
     const correct = s.tags;
@@ -1249,74 +874,137 @@ function submitRound() {
     const matched = player.filter(t => correct.includes(t));
     const wrong = player.filter(t => !correct.includes(t));
     const missed = correct.filter(t => !player.includes(t));
+    
+    totalPossibleTags += correct.length;
+    totalCorrectTags += matched.length;
 
-    // Update appeal stats
-    for (const t of correct) {
-      state.sessionAppealStats[t].t++;
-      if (matched.includes(t)) state.sessionAppealStats[t].c++;
+    let sentScore = 0;
+
+    for(let t of matched) {
+      if(t === state.persona) {
+        sentScore += 20;
+        personaBonuses++;
+      } else {
+        sentScore += 10;
+      }
+    }
+    
+    sentScore -= (wrong.length * 5);
+    
+    let isPerfect = (correct.length > 0 && missed.length === 0 && wrong.length === 0);
+    if(isPerfect) {
+      sentScore += 10;
+      perfectSentences++;
     }
 
-    roundCorrect += matched.length;
-    roundWrong += wrong.length;
-    roundMissed += missed.length;
-
-    return { text: s.text, correct, player, matched, wrong, missed };
+    roundScore += sentScore;
+    return { text: s.text, correct, player, matched, wrong, missed, isPerfect, exp: s.exp };
   });
 
-  roundScore = (roundCorrect * 10) - (roundWrong * 5);
   state.totalScore += roundScore;
-  state.totalCorrect += roundCorrect;
-  state.totalWrong += roundWrong;
-  state.totalMissed += roundMissed;
+  state.lastResults = sentenceResults;
 
-  showResults(sentenceResults, roundScore, roundCorrect, roundWrong, roundMissed);
+  let accuracy = totalPossibleTags > 0 ? (totalCorrectTags / totalPossibleTags) : 0;
+  let rank = 'F'; let rankClass = 'rank-F';
+  
+  if (accuracy === 1 && perfectSentences === passage.sentences.filter(s=>s.tags.length>0).length) { rank = 'S'; rankClass = 'rank-S'; }
+  else if (accuracy >= 0.8) { rank = 'A'; rankClass = 'rank-A'; }
+  else if (accuracy >= 0.6) { rank = 'B'; rankClass = 'rank-B'; }
+  else if (accuracy >= 0.4) { rank = 'C'; rankClass = 'rank-C'; }
+
+  let promoted = false;
+  if (!state.isCustomMode && (rank === 'S' || rank === 'A' || rank === 'B') && state.clearanceLevel < 4) {
+    state.clearanceLevel++;
+    promoted = true;
+  }
+
+  showResults(sentenceResults, roundScore, rank, rankClass, personaBonuses, perfectSentences, promoted);
 }
 
-function showResults(sentenceResults, roundScore, correct, wrong, missed) {
+function showResults(sentenceResults, roundScore, rank, rankClass, personaBonuses, perfectSentences, promoted) {
   const passage = state.roundPassages[state.currentRound];
-  document.getElementById("resultsScore").textContent = (roundScore >= 0 ? "+" : "") + roundScore + " pts";
-  document.getElementById("resultsScore").style.color = roundScore >= 0 ? "var(--logos)" : "var(--fallacy)";
-  document.getElementById("resultsBreakdown").innerHTML =
-    `<span class="rb-correct">${correct} correct</span>` +
-    `<span class="rb-wrong">${wrong} wrong</span>` +
-    `<span class="rb-missed">${missed} missed</span>`;
+  
+  const rankEl = document.getElementById("resultsRank");
+  rankEl.textContent = rank + "-TIER";
+  rankEl.className = "rank-stamp " + rankClass;
+
+  document.getElementById("resultsScore").textContent = (roundScore >= 0 ? "+" : "") + roundScore + " PTS";
+  
+  const banner = document.getElementById("promotionBanner");
+  if (state.isCustomMode) {
+    banner.textContent = `✦ CUSTOM INTEL DECODED ✦`;
+    banner.className = "promotion-banner promo-custom";
+  } else if (promoted) {
+    banner.textContent = `▲ PROMOTED TO LEVEL ${state.clearanceLevel} CLEARANCE`;
+    banner.className = "promotion-banner promo-success";
+  } else {
+    banner.textContent = `▼ PROMOTION DENIED (Requires B-Tier or Higher)`;
+    banner.className = "promotion-banner promo-fail";
+  }
+
+  let feedback = [];
+  if(personaBonuses > 0) feedback.push(`Draft Bonus Activated (${personaBonuses}x)`);
+  if(perfectSentences > 0) feedback.push(`${perfectSentences} Perfect Sentences`);
+  document.getElementById("bonusFeedback").textContent = feedback.join(" | ");
+
   document.getElementById("resultsSource").textContent = passage.source;
 
   const labels = { ethos: "Ethos", pathos: "Pathos", logos: "Logos", fallacy: "Fallacy" };
   const container = document.getElementById("resultsText");
   container.innerHTML = "";
-  sentenceResults.forEach(r => {
-    const span = document.createElement("span");
-    span.className = "result-sentence";
-    let html = r.text + " ";
+  
+  sentenceResults.forEach((r, i) => {
+    const block = document.createElement("div");
+    block.className = "result-sentence-block";
+    
+    if(r.isPerfect) block.style.borderLeftColor = "var(--logos)";
+    else if(r.wrong.length > 0 || r.missed.length > 0) block.style.borderLeftColor = "var(--fallacy)";
+    else block.style.borderLeftColor = "var(--text-secondary)";
 
-    // Show tags
+    let html = `<span class="result-sentence">${r.text}</span>`;
     const tagHTML = [];
+    
     for (const t of r.matched) {
-      tagHTML.push(`<span class="result-tag correct">${labels[t]} ✓</span>`);
+      if(t === state.persona) tagHTML.push(`<span class="result-tag bonus">${labels[t]} ✓ (x2)</span>`);
+      else tagHTML.push(`<span class="result-tag correct">${labels[t]} ✓</span>`);
     }
     for (const t of r.wrong) {
       tagHTML.push(`<span class="result-tag wrong">${labels[t]} ✗</span>`);
     }
     for (const t of r.missed) {
-      tagHTML.push(`<span class="result-tag missed">${labels[t]}</span>`);
+      tagHTML.push(`<span class="result-tag missed">${labels[t]} missed</span>`);
     }
+    
     if (tagHTML.length > 0) {
-      html += `<span class="result-tags">${tagHTML.join("")}</span>`;
+      html += `<div class="result-tags">${tagHTML.join("")}</div>`;
     }
 
-    span.innerHTML = html;
-    container.appendChild(span);
+    // LAZY PROOF: Auto-show hardcoded explanation if they missed/wrong on Default mode
+    if ((r.wrong.length > 0 || r.missed.length > 0) && !state.isCustomMode && r.exp) {
+      html += `<div class="hardcoded-exp-box"><strong>Director's Note:</strong> ${r.exp}</div>`;
+    } 
+    // AI Debrief Button (For custom mode, or if they still want more info)
+    else if ((r.wrong.length > 0 || r.missed.length > 0) && state.isCustomMode) {
+      html += `
+        <div class="ai-debrief-container">
+          <button class="btn-micro-ai" onclick="requestAIDebrief(${i}, this)">✨ Ask Director for Debrief</button>
+          <div class="ai-explanation-box" id="ai-exp-${i}"></div>
+        </div>
+      `;
+    }
+
+    block.innerHTML = html;
+    container.appendChild(block);
   });
 
-  const isLast = state.currentRound >= 3;
-  document.getElementById("nextRoundBtn").textContent = isLast ? "See Final Results" : "Next Round";
+  const isLast = state.currentRound >= (state.roundPassages.length - 1);
+  document.getElementById("nextRoundBtn").textContent = isLast ? "View Final Debrief" : "Next Scan";
   showScreen("results");
 }
 
 function nextRound() {
   state.currentRound++;
-  if (state.currentRound >= 4) {
+  if (state.currentRound >= state.roundPassages.length) {
     showEnd();
   } else {
     loadRound();
@@ -1325,76 +1013,55 @@ function nextRound() {
 
 // ── END SCREEN ──
 function showEnd() {
-  incGamesPlayed();
-
-  const totalAttempted = state.totalCorrect + state.totalWrong;
-  const accuracy = totalAttempted > 0 ? Math.round(100 * state.totalCorrect / totalAttempted) : 0;
-
-  document.getElementById("endSubtitle").textContent = `Great work, ${state.playerName}!`;
-  document.getElementById("endTotalScore").textContent = state.totalScore;
-  document.getElementById("endAccuracy").textContent = accuracy + "%";
-  document.getElementById("endCorrect").textContent = state.totalCorrect;
-  document.getElementById("endRounds").textContent = "4";
-
-  // Appeal breakdown
-  const colors = { ethos: "var(--ethos)", pathos: "var(--pathos)", logos: "var(--logos)", fallacy: "var(--fallacy)" };
-  const labels = { ethos: "Ethos", pathos: "Pathos", logos: "Logos", fallacy: "Fallacy" };
-  const breakdownEl = document.getElementById("endAppealBreakdown");
-  breakdownEl.innerHTML = "<h3>Accuracy by Appeal Type</h3>";
-
-  let bestAppeal = "", worstAppeal = "", bestPct = -1, worstPct = 101;
-  const appealPcts = {};
-
-  for (const key of ["ethos", "pathos", "logos", "fallacy"]) {
-    const s = state.sessionAppealStats[key];
-    const pct = s.t > 0 ? Math.round(100 * s.c / s.t) : 0;
-    appealPcts[key] = pct;
-    if (pct > bestPct || bestPct === -1) { bestPct = pct; bestAppeal = key; }
-    if (pct < worstPct || worstPct === 101) { worstPct = pct; worstAppeal = key; }
-
-    breakdownEl.innerHTML += `<div class="end-appeal-row">
-      <span class="end-appeal-label" style="color:${colors[key]}">${labels[key]}</span>
-      <div class="end-appeal-bar"><div class="end-appeal-fill" style="width:${pct}%;background:${colors[key]}"></div></div>
-      <span class="end-appeal-pct">${pct}%</span>
-    </div>`;
-  }
-
-  // Insight
-  const insightEl = document.getElementById("endInsight");
-  if (bestAppeal === worstAppeal) {
-    insightEl.innerHTML = `You identified all appeal types with equal accuracy at <strong>${bestPct}%</strong>. Keep practicing to sharpen your analysis!`;
+  document.getElementById("endSubtitle").textContent = `Operative ${state.playerName} - Debriefing`;
+  
+  const clDisplay = document.getElementById("finalClearanceDisplay");
+  if (state.isCustomMode) {
+    clDisplay.textContent = `Status: Custom Simulation Complete`;
+    clDisplay.style.borderColor = "#c4b5fd";
+    clDisplay.style.color = "#c4b5fd";
+    clDisplay.style.background = "rgba(139, 92, 246, 0.1)";
   } else {
-    insightEl.innerHTML = `You're strongest at identifying <strong>${labels[bestAppeal]}</strong> (${bestPct}%) and could improve on <strong>${labels[worstAppeal]}</strong> (${worstPct}%). Focus your study on recognizing ${worstAppeal === "fallacy" ? "logical fallacies" : worstAppeal + " appeals"} in the texts you read.`;
+    clDisplay.textContent = `Final Status: ${CLEARANCE_TITLES[state.clearanceLevel - 1]}`;
+    clDisplay.style.borderColor = "var(--logos)";
+    clDisplay.style.color = "var(--logos)";
+    clDisplay.style.background = "rgba(74,222,128,0.1)";
   }
 
-  // High score
-  const prev = getHighScore();
-  const hsEl = document.getElementById("endHighScore");
-  if (state.totalScore > prev) {
-    setHighScore(state.totalScore);
-    hsEl.style.display = "";
+  let finalScore = state.totalScore;
+  let currentScore = 0;
+  let step = Math.max(1, Math.floor(finalScore / 50));
+  
+  let scoreEl = document.getElementById("endTotalScore");
+  let timer = setInterval(() => {
+    currentScore += step;
+    if(currentScore >= finalScore) {
+      currentScore = finalScore;
+      clearInterval(timer);
+    }
+    scoreEl.textContent = currentScore;
+  }, 20);
+
+  let pName = document.querySelector(`.p-${state.persona} .p-name`).textContent;
+  let insight = `You operated as <strong>${pName}</strong>. `;
+  
+  if (state.isCustomMode) {
+    insight += "Custom intel operations are excellent for targeted practice. Generate another topic or return to the main campaign to rank up.";
+  } else if (state.clearanceLevel === 4) {
+    insight += "Outstanding work reaching Master Operative status. Your rhetorical analysis is razor sharp.";
   } else {
-    hsEl.style.display = "none";
+    insight += "You fell short of Master Operative status. Draft a new persona and try again to improve your clearance level.";
   }
 
-  // Persist appeal stats (merge with existing)
-  let existing = loadStats() || { ethos:{c:0,t:0}, pathos:{c:0,t:0}, logos:{c:0,t:0}, fallacy:{c:0,t:0} };
-  for (const key of ["ethos", "pathos", "logos", "fallacy"]) {
-    existing[key].c += state.sessionAppealStats[key].c;
-    existing[key].t += state.sessionAppealStats[key].t;
-  }
-  saveStats(existing);
+  document.getElementById("endInsight").innerHTML = insight;
 
   showScreen("end");
 }
 
 function replayGame() {
-  showHomeStats();
+  document.getElementById("nameInput").value = state.playerName;
   showScreen("home");
 }
-
-// ── BOOT ──
-init();
 </script>
 </body>
 </html>
