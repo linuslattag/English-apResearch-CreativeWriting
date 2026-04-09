@@ -9,22 +9,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:          #07091a;
-  --surface:     #0f1424;
-  --card:        #131828;
-  --card2:       #1a2040;
-  --gold:        #c9a84c;
-  --gold-bright: #f0c94a;
-  --gold-dim:    rgba(201,168,76,0.18);
-  --gold-border: rgba(201,168,76,0.35);
-  --text:        #e4e6f2;
-  --muted:       #6b7492;
-  --red:         #e63946;
-  --red-dim:     rgba(230,57,70,0.12);
-  --green:       #2a9d8f;
-  --green-dim:   rgba(42,157,143,0.12);
+  --bg:          #050814;
+  --surface:     #0b1120;
+  --card:        #151d30;
+  --gold:        #d4af37;
+  --gold-dim:    rgba(212, 175, 55, 0.15);
+  --gold-border: rgba(212, 175, 55, 0.4);
+  --text:        #f1f5f9;
+  --muted:       #94a3b8;
+  --admit:       #10b981; /* Neon Green */
+  --dismiss:     #ef4444; /* Neon Red */
+  --admit-dim:   rgba(16, 185, 129, 0.15);
+  --dismiss-dim: rgba(239, 68, 68, 0.15);
   --radius:      12px;
-  --shadow:      0 6px 28px rgba(0,0,0,0.5);
 }
 
 html { scroll-behavior: smooth; }
@@ -32,784 +29,845 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Georgia', 'Times New Roman', serif;
   min-height: 100vh;
+  overflow-x: hidden;
   background-image:
-    radial-gradient(ellipse 60% 50% at 15% 60%, rgba(201,168,76,0.04) 0%, transparent 100%),
-    radial-gradient(ellipse 60% 40% at 85% 20%, rgba(42,100,157,0.04) 0%, transparent 100%);
+    radial-gradient(ellipse 60% 50% at 15% 60%, rgba(212, 175, 55, 0.05) 0%, transparent 100%),
+    radial-gradient(ellipse 60% 40% at 85% 20%, rgba(16, 185, 129, 0.03) 0%, transparent 100%);
 }
 
-/* ===== SCREENS ===== */
+h1, h2, h3, .sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
 .screen { display: none; min-height: 100vh; }
-.screen.active { display: block; animation: fadeUp 0.3s ease; }
+.screen.active { display: flex; flex-direction: column; animation: fadeUp 0.4s ease-out; }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(15px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== SHARED UTILITY ===== */
-.gold { color: var(--gold); }
-.muted { color: var(--muted); }
+/* ── MODALS & LOADERS ── */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(5, 8, 20, 0.9); backdrop-filter: blur(5px);
+  display: none; align-items: center; justify-content: center; z-index: 1000;
+  animation: fadeIn 0.2s ease-out;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: var(--surface); border: 1px solid var(--gold);
+  border-radius: var(--radius); padding: 2.5rem; max-width: 600px; width: 90%;
+  box-shadow: 0 10px 50px rgba(212, 175, 55, 0.2); text-align: left;
+  max-height: 90vh; overflow-y: auto; font-family: -apple-system, sans-serif;
+}
+.modal-title {
+  color: var(--gold); font-size: 1.5rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; text-align: center;
+}
+.modal-content p { color: var(--muted); margin-bottom: 1rem; line-height: 1.6;}
 
-/* ===== WELCOME SCREEN ===== */
-#screen-welcome {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 20px 60px;
-  gap: 0;
-}
-#screen-welcome.active { display: flex; }
+/* The Bench Book Definitions */
+.def-block { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--gold); }
+.def-title { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 5px; color: var(--gold); }
+.def-desc { color: var(--muted); font-size: 0.95rem; line-height: 1.5; }
+.def-desc strong { color: var(--text); }
 
-.emblem {
-  text-align: center;
-  margin-bottom: 36px;
+/* AI Loader */
+.ai-loader { text-align: center; color: var(--gold); font-family: monospace; font-size: 1.1rem; letter-spacing: 0.1em; margin-top: 20px;}
+.ai-spinner {
+  width: 60px; height: 60px; margin: 0 auto;
+  border: 4px solid var(--gold-dim); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin 1s linear infinite;
 }
-.emblem-icon {
-  font-size: 60px;
-  display: block;
-  margin-bottom: 14px;
-  filter: drop-shadow(0 0 24px rgba(201,168,76,0.45));
-  animation: glow 3s ease-in-out infinite alternate;
-}
-@keyframes glow {
-  from { filter: drop-shadow(0 0 12px rgba(201,168,76,0.3)); }
-  to   { filter: drop-shadow(0 0 28px rgba(201,168,76,0.6)); }
-}
-.emblem-title {
-  font-size: clamp(38px, 9vw, 58px);
-  color: var(--gold);
-  letter-spacing: 0.18em;
-  text-shadow: 0 0 40px rgba(201,168,76,0.25);
-  line-height: 1;
-}
-.emblem-sub {
-  margin-top: 8px;
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
+@keyframes spin { 100% { transform: rotate(360deg); } }
 
-.welcome-card {
-  background: var(--card);
-  border: 1px solid var(--gold-border);
-  border-radius: var(--radius);
-  padding: 32px 28px;
-  width: 100%;
-  max-width: 480px;
-  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
-}
-.welcome-card h2 {
-  font-size: 20px;
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: 10px;
-}
-.welcome-intro {
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.65;
-  text-align: center;
-  margin-bottom: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.welcome-intro em { color: var(--text); font-style: normal; }
+/* ── HOME SCREEN ── */
+#home { align-items: center; justify-content: center; padding: 2rem; }
 
-/* ===== INSTRUCTIONS ===== */
-.instructions-box {
-  background: var(--surface);
-  border: 1px solid var(--gold-border);
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin-bottom: 24px;
-  text-align: left;
-}
-.instructions-box h3 {
-  font-size: 13px;
-  color: var(--gold);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 12px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.instructions-box ol {
-  padding-left: 20px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.instructions-box li { margin-bottom: 8px; }
-.instructions-box li:last-child { margin-bottom: 0; }
-.instructions-box strong { color: var(--text); }
+.logo-container { text-align: center; margin-bottom: 2rem; }
+.logo-icon { font-size: 4rem; display: block; margin-bottom: 10px; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5)); }
+.logo { font-size: 3rem; font-weight: 900; letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; line-height: 1;}
+.subtitle { color: var(--muted); font-size: 1rem; margin-top: 10px; letter-spacing: 0.2em; text-transform: uppercase;}
 
-.form-group { margin-bottom: 18px; }
-.form-group label {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 7px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.form-group input {
-  width: 100%;
-  background: var(--surface);
-  border: 1px solid var(--gold-border);
-  border-radius: 8px;
-  padding: 11px 15px;
-  color: var(--text);
-  font-size: 15px;
-  font-family: Georgia, serif;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.form-group input:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+.home-card {
+  background: var(--surface); border: 1px solid var(--gold-border);
+  border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 650px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.6);
 }
 
-.btn-enter {
-  width: 100%;
-  background: var(--gold);
-  color: var(--bg);
-  border: none;
-  border-radius: 8px;
-  padding: 13px;
-  font-size: 13px;
-  font-weight: bold;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  cursor: pointer;
-  margin-top: 6px;
-  transition: background 0.15s, transform 0.1s;
+.input-group { margin-bottom: 1.5rem; }
+.input-group label {
+  display: block; font-size: 0.85rem; font-weight: bold; color: var(--gold);
+  margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-family: -apple-system, sans-serif;
 }
-.btn-enter:hover { background: var(--gold-bright); }
-.btn-enter:active { transform: scale(0.98); }
+.input-group input {
+  width: 100%; padding: 1rem; background: var(--bg); color: var(--text);
+  border: 1px solid var(--gold-border); border-radius: 8px; font-size: 1.1rem;
+  transition: all 0.2s; font-family: Georgia, serif;
+}
+.input-group input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 10px rgba(212, 175, 55, 0.2); }
 
-.welcome-footer {
-  margin-top: 16px;
+/* SURVIVAL INSTRUCTIONS */
+.survival-info {
+  background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px; padding: 15px; margin-bottom: 2rem; font-family: -apple-system, sans-serif;
   text-align: center;
 }
-.btn-ghost {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 12px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  cursor: pointer;
-  transition: color 0.2s;
-  padding: 4px 8px;
-  letter-spacing: 0.05em;
+.survival-info h3 { color: var(--dismiss); font-size: 1rem; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;}
+.survival-info p { color: var(--muted); font-size: 0.9rem; line-height: 1.5;}
+
+/* PERSONA DRAFTING */
+.draft-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gold); margin-bottom: 1rem; font-weight: bold; font-family: -apple-system, sans-serif;}
+.persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 2rem;}
+.persona-card {
+  background: var(--card); border: 1px solid var(--gold-border);
+  border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.2s; text-align: left; font-family: -apple-system, sans-serif;
 }
-.btn-ghost:hover { color: var(--gold); }
+.persona-card:hover { transform: translateY(-2px); border-color: var(--muted); }
+.persona-card.selected { border-color: var(--gold); background: var(--gold-dim); box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
+.p-name { font-weight: 900; font-size: 1.05rem; color: var(--text); margin-bottom: 4px; }
+.p-perk { font-size: 0.8rem; color: var(--gold); font-weight: bold;}
+.p-desc { font-size: 0.75rem; color: var(--muted); margin-top: 4px; line-height: 1.4;}
 
-/* ===== SOURCE SCREEN ===== */
-#screen-source { padding: 0 0 80px; max-width: 680px; margin: 0 auto; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 1rem 2rem; border: none; border-radius: 8px; font-size: 1rem;
+  font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+  cursor: pointer; transition: all 0.2s; font-family: -apple-system, sans-serif;
+}
+.btn:active { transform: scale(0.98); }
+.btn-primary { background: var(--gold); color: #000; width: 100%; margin-bottom: 12px;}
+.btn-primary:hover { background: #ebd575; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+.btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); width: 100%; border-color: var(--muted);}
+.btn-secondary:hover { color: var(--text); border-color: var(--text); }
 
+.divider {
+  display: flex; align-items: center; text-align: center; margin: 2rem 0;
+  color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; font-family: -apple-system, sans-serif;
+}
+.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--gold-border); }
+.divider:not(:empty)::before { margin-right: 1em; }
+.divider:not(:empty)::after { margin-left: 1em; }
+
+.btn-ai { background: linear-gradient(135deg, #4ade80, #0d9488); color: #000; width: 100%; margin-top: 10px; border: none;}
+.btn-ai:hover { box-shadow: 0 0 20px rgba(74, 222, 128, 0.4); filter: brightness(1.1);}
+
+/* ── COURT SCREEN (THE DOCKET) ── */
 .topbar {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 20px; background: rgba(7,9,26,0.9);
-  border-bottom: 1px solid var(--gold-border);
-  position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px);
+  padding: 15px 24px; background: rgba(5, 8, 20, 0.95); border-bottom: 1px solid var(--gold-border);
+  position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); font-family: -apple-system, sans-serif;
 }
-.topbar-logo {
-  font-size: 13px; color: var(--gold); letter-spacing: 0.14em;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.topbar-right { display: flex; align-items: center; gap: 14px; }
-.topbar-progress {
-  font-size: 12px; color: var(--muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
+.hud-item { display: flex; flex-direction: column; align-items: center; }
+.hud-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 2px; font-weight: bold;}
+.hud-val { font-size: 1.2rem; font-weight: 900; color: #fff; font-family: monospace; display: flex; align-items: center; gap: 5px;}
+.streak-hot { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+.strike-icon { font-size: 1.1rem; opacity: 1; transition: opacity 0.3s;}
+.strike-lost { opacity: 0.2; filter: grayscale(1); }
 
-.progress-track { height: 2px; background: rgba(201,168,76,0.12); }
-.progress-fill { height: 100%; background: var(--gold); transition: width 0.5s; }
+.court-body { max-width: 800px; margin: 0 auto; padding: 30px 20px 120px; width: 100%; }
 
-.source-body { padding: 24px 20px 0; }
+.case-file { background: var(--card); border: 1px solid var(--gold-border); border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; margin-bottom: 24px;}
+.cf-header { padding: 20px 24px; border-bottom: 1px solid rgba(212, 175, 55, 0.1); background: rgba(255,255,255,0.02);}
+.cf-title { font-size: 1.4rem; color: #fff; line-height: 1.4; margin-bottom: 16px; font-weight: bold;}
+.cf-meta { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-family: -apple-system, sans-serif; align-items: center;}
+.meta-k { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); font-weight: bold;}
+.meta-v { font-size: 0.95rem; color: var(--text); }
+.cf-body { padding: 24px; background: rgba(0,0,0,0.2); }
+.cf-excerpt { font-size: 1.2rem; line-height: 1.8; color: var(--text); font-style: italic; border-left: 3px solid var(--gold); padding-left: 15px;}
 
-.case-badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-.exhibit-tag {
-  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.type-badge {
-  background: var(--gold-dim); border: 1px solid var(--gold-border); color: var(--gold);
-  font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 3px 10px; border-radius: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-
-.case-file {
-  background: var(--card); border: 1px solid var(--gold-border);
-  border-radius: var(--radius); overflow: hidden; margin-bottom: 16px;
-  box-shadow: var(--shadow);
-}
-.case-file-top { padding: 20px 22px 18px; border-bottom: 1px solid rgba(201,168,76,0.08); }
-.source-title { font-size: 17px; color: #fff; line-height: 1.4; margin-bottom: 16px; }
-.meta-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; }
-.meta-k {
-  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 2;
-}
-.meta-v {
-  font-size: 13px; color: var(--muted); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; line-height: 2;
-}
-.excerpt-area { padding: 16px 22px; background: rgba(0,0,0,0.22); }
-.excerpt-kicker {
-  font-size: 8px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; display: block; margin-bottom: 8px;
-}
-.excerpt-quote { font-size: 14px; color: var(--text); line-height: 1.7; font-style: italic; }
-
-.cross-exam {
-  background: var(--card); border: 1px solid var(--gold-border);
-  border-radius: var(--radius); padding: 20px 22px; margin-bottom: 20px;
-  box-shadow: var(--shadow);
-}
-.cross-exam-title {
-  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin-bottom: 14px;
-  display: flex; align-items: center; gap: 8px;
-}
-.cross-exam-title::after { content: ''; flex: 1; height: 1px; background: var(--gold-border); }
-
-.q-row { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-.q-row:last-child { border-bottom: none; }
-.q-text { font-size: 14px; color: var(--text); margin-bottom: 10px; line-height: 1.45; }
-.yn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+/* Cross Examination Questions */
+.cross-exam { background: var(--card); border: 1px solid var(--gold-border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; font-family: -apple-system, sans-serif;}
+.ce-title { font-size: 1rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; font-weight: 800; border-bottom: 1px solid var(--gold-border); padding-bottom: 10px;}
+.q-row { margin-bottom: 20px; }
+.q-row:last-child { margin-bottom: 0; }
+.q-text { font-size: 1.05rem; margin-bottom: 10px; font-weight: 600;}
+.q-text span { color: var(--gold); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; font-weight: 800;}
+.yn-group { display: flex; gap: 10px; }
 .yn-btn {
-  padding: 5px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.12);
-  background: transparent; color: var(--muted); font-size: 11px; font-weight: bold;
-  letter-spacing: 0.12em; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  cursor: pointer; transition: all 0.15s;
+  flex: 1; padding: 10px; border-radius: 8px; border: 2px solid var(--border);
+  background: transparent; color: var(--muted); font-weight: bold; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; text-transform: uppercase;
 }
-.yn-btn:hover:not(.sel-yes):not(.sel-no):not(.sel-maybe) { border-color: rgba(255,255,255,0.28); color: var(--text); }
-.yn-btn.sel-yes { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-.yn-btn.sel-no { background: var(--red-dim); border-color: var(--red); color: var(--red); }
-.yn-btn.sel-maybe { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+.yn-btn.yes.selected { background: var(--admit-dim); border-color: var(--admit); color: var(--admit); }
+.yn-btn.no.selected { background: var(--dismiss-dim); border-color: var(--dismiss); color: var(--dismiss); }
+.yn-btn:hover:not(.selected) { border-color: var(--muted); color: var(--text); }
 
-.ruling-zone { padding: 0 0 4px; }
-.ruling-label {
-  font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; text-align: center; margin-bottom: 14px;
+/* Ruling Buttons */
+.ruling-zone { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-family: -apple-system, sans-serif;}
+.ruling-btn {
+  padding: 20px; border-radius: 12px; border: 2px solid; font-size: 1.2rem; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
 }
-.ruling-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.btn-rule {
-  padding: 16px 12px; border-radius: 10px; border: 2px solid; font-size: 14px; font-weight: bold;
-  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.btn-admit { background: var(--green-dim); border-color: var(--green); color: var(--green); }
-.btn-admit:not(:disabled):hover { background: var(--green); color: #fff; box-shadow: 0 4px 20px rgba(42,157,143,0.35); transform: translateY(-2px); }
-.btn-dismiss { background: var(--red-dim); border-color: var(--red); color: var(--red); }
-.btn-dismiss:not(:disabled):hover { background: var(--red); color: #fff; box-shadow: 0 4px 20px rgba(230,57,70,0.35); transform: translateY(-2px); }
-.btn-rule:disabled { opacity: 0.28; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
-.ruling-hint {
-  text-align: center; margin-top: 12px; font-size: 11px; color: var(--muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-style: italic;
-}
+.ruling-btn span { font-size: 0.8rem; font-weight: normal; opacity: 0.8; letter-spacing: 0;}
+.btn-admit { background: var(--admit-dim); border-color: var(--admit); color: var(--admit); }
+.btn-admit:hover { background: var(--admit); color: #000; box-shadow: 0 0 30px rgba(16, 185, 129, 0.4); transform: translateY(-3px);}
+.btn-dismiss { background: var(--dismiss-dim); border-color: var(--dismiss); color: var(--dismiss); }
+.btn-dismiss:hover { background: var(--dismiss); color: #fff; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); transform: translateY(-3px);}
 
-/* ===== VERDICT SCREEN ===== */
-#screen-verdict { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
-
-.verdict-hero { text-align: center; padding: 8px 0 32px; }
-.verdict-hero-icon { font-size: 52px; display: block; margin-bottom: 14px; filter: drop-shadow(0 0 20px rgba(201,168,76,0.4)); }
-.verdict-hero h1 { font-size: 26px; color: var(--gold); letter-spacing: 0.18em; margin-bottom: 22px; }
-.score-wrap {
-  display: inline-flex; align-items: baseline; gap: 4px; background: var(--card2);
-  border: 1px solid var(--gold-border); border-radius: 16px; padding: 12px 28px; margin-bottom: 10px;
+/* ── VERDICT SCREEN ── */
+#verdict { padding: 40px 20px; max-width: 700px; margin: 0 auto; font-family: -apple-system, sans-serif;}
+.verdict-header { text-align: center; margin-bottom: 30px; }
+.stamp {
+  display: inline-block; font-size: 3.5rem; font-weight: 900; text-transform: uppercase;
+  letter-spacing: 0.1em; border: 6px solid; padding: 10px 30px; border-radius: 12px;
+  transform: rotate(-5deg); margin-bottom: 20px;
 }
-.score-n { font-size: 64px; color: var(--gold); line-height: 1; font-weight: bold; }
-.score-d { font-size: 32px; color: var(--muted); }
-.score-rank {
-  font-size: 12px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin-top: 6px;
+.stamp.correct { color: var(--admit); border-color: var(--admit); text-shadow: 0 0 20px rgba(16, 185, 129, 0.4); box-shadow: 0 0 20px rgba(16, 185, 129, 0.2), inset 0 0 20px rgba(16, 185, 129, 0.2);}
+.stamp.incorrect { color: var(--dismiss); border-color: var(--dismiss); text-shadow: 0 0 20px rgba(239, 68, 68, 0.4); box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), inset 0 0 20px rgba(239, 68, 68, 0.2);}
+
+.score-tally { font-size: 1.5rem; font-weight: bold; color: var(--gold); margin-bottom: 10px; font-family: monospace;}
+.promo-status { display: inline-block; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 20px;}
+.promo-up { background: var(--admit-dim); color: var(--admit); border: 1px solid var(--admit); }
+.promo-down { background: var(--dismiss-dim); color: var(--dismiss); border: 1px solid var(--dismiss); animation: shake 0.4s ease;}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
 }
 
-.verdict-divider {
-  display: flex; align-items: center; gap: 12px; margin: 24px 0 20px;
-  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
-.verdict-divider::before, .verdict-divider::after { content: ''; flex: 1; height: 1px; background: var(--gold-border); }
+/* Debrief Box */
+.debrief-box { background: var(--card); border: 1px solid var(--gold-border); border-radius: var(--radius); padding: 24px; text-align: left; margin-bottom: 30px;}
+.debrief-title { font-size: 1.1rem; color: var(--gold); text-transform: uppercase; font-weight: 900; margin-bottom: 15px; letter-spacing: 0.05em; border-bottom: 1px solid var(--gold-border); padding-bottom: 10px;}
+.debrief-text { font-size: 1.1rem; line-height: 1.6; color: var(--text); margin-bottom: 20px;}
 
-.vcard {
-  background: var(--card); border: 1px solid; border-radius: var(--radius);
-  padding: 16px 18px; margin-bottom: 12px; display: flex; gap: 14px; align-items: flex-start;
-}
-.vcard.vright { border-color: rgba(42,157,143,0.35); background: linear-gradient(120deg, var(--card), rgba(42,157,143,0.04)); }
-.vcard.vwrong { border-color: rgba(230,57,70,0.35); background: linear-gradient(120deg, var(--card), rgba(230,57,70,0.04)); }
-.vstamp {
-  flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; font-size: 14px; margin-top: 2px; font-weight: bold;
-}
-.vstamp.st-right { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
-.vstamp.st-wrong { background: var(--red-dim); color: var(--red); border: 1px solid var(--red); }
+.cross-exam-results { display: grid; gap: 10px; margin-bottom: 20px;}
+.ce-result-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 4px solid;}
+.ce-result-item.r-correct { border-left-color: var(--admit); }
+.ce-result-item.r-wrong { border-left-color: var(--dismiss); }
+.ce-label { font-size: 0.9rem; font-weight: 600; }
+.ce-pts { font-family: monospace; font-weight: bold; font-size: 1rem; color: var(--gold);}
 
-.vcard-body { flex: 1; min-width: 0; }
-.vcard-title { font-size: 14px; color: #fff; margin-bottom: 7px; line-height: 1.35; }
-.vcard-chips { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
-.chip {
-  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 9px;
-  border-radius: 4px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; font-weight: bold;
-}
-.chip-your-a { background: rgba(42,157,143,0.18); color: var(--green); }
-.chip-your-d { background: rgba(230,57,70,0.18); color: var(--red); }
-.chip-exp-a  { background: rgba(201,168,76,0.14); color: var(--gold); }
-.chip-exp-d  { background: rgba(201,168,76,0.14); color: var(--gold); }
-.vcard-explanation {
-  font-size: 13px; color: var(--muted); line-height: 1.55; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-}
+.btn-ai-debrief { background: rgba(74, 222, 128, 0.1); border: 1px solid var(--admit); color: var(--admit); width: 100%; padding: 12px; font-size: 0.9rem;}
+.btn-ai-debrief:hover { background: rgba(74, 222, 128, 0.2); }
+.ai-exp-box { margin-top: 15px; background: rgba(0,0,0,0.5); border-left: 3px solid var(--admit); padding: 15px; font-size: 1rem; line-height: 1.5; display: none; animation: fadeIn 0.3s ease;}
 
-.verdict-actions { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.btn-outline, .btn-solid {
-  padding: 13px; border-radius: 8px; font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em; text-align: center; border: 1px solid var(--gold-border);
-}
-.btn-outline { background: transparent; color: var(--gold); }
-.btn-outline:hover { background: var(--gold-dim); border-color: var(--gold); }
-.btn-solid { border: none; background: var(--gold); color: var(--bg); font-weight: bold; }
-.btn-solid:hover { background: var(--gold-bright); }
+/* ── END SCREEN ── */
+#end { align-items: center; justify-content: center; padding: 2rem; text-align: center; font-family: -apple-system, sans-serif;}
+.end-card { background: var(--surface); border: 1px solid var(--dismiss); border-radius: var(--radius); padding: 3rem 2rem; max-width: 500px; width: 100%; box-shadow: 0 10px 50px rgba(239, 68, 68, 0.2); }
+.end-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 0.5rem; text-transform: uppercase; color: var(--dismiss);}
+.final-rank { font-size: 1.2rem; font-weight: 600; color: var(--muted); margin-bottom: 2rem;}
 
-/* ===== LEADERBOARD SCREEN ===== */
-#screen-leaderboard { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
-.lb-hero { text-align: center; margin-bottom: 30px; }
-.lb-hero-icon { font-size: 44px; display: block; margin-bottom: 12px; }
-.lb-title { font-size: 24px; color: var(--gold); letter-spacing: 0.18em; margin-bottom: 6px; }
-.lb-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
+.end-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 2rem; }
+.end-stat-box { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; border: 1px solid var(--gold-border);}
+.end-stat-value { font-size: 2.5rem; font-weight: 900; color: var(--gold); font-family: monospace; line-height: 1; margin-bottom: 0.5rem;}
+.end-stat-label { font-size: 0.8rem; color: var(--text); text-transform: uppercase; letter-spacing: 0.1em; font-weight: bold;}
 
-.lb-table-wrap {
-  background: var(--card); border: 1px solid var(--gold-border); border-radius: var(--radius);
-  overflow: hidden; margin-bottom: 20px; box-shadow: var(--shadow);
-}
-table.lb { width: 100%; border-collapse: collapse; }
-table.lb thead tr { background: var(--surface); }
-table.lb th { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--gold-border); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
-table.lb td { padding: 11px 14px; font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); }
-table.lb tbody tr:last-child td { border-bottom: none; }
-
-.lb-empty { text-align: center; padding: 56px 20px; color: var(--muted); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; }
-.lb-empty-icon { font-size: 36px; display: block; margin-bottom: 10px; opacity: 0.4; }
-
-.btn-back-wide {
-  display: block; width: 100%; padding: 13px; border-radius: 8px; border: 1px solid var(--gold-border);
-  background: transparent; color: var(--gold); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-  cursor: pointer; text-align: center; transition: all 0.2s; letter-spacing: 0.05em; margin-bottom: 12px;
-}
-.btn-back-wide:hover { background: var(--gold-dim); border-color: var(--gold); }
-
-/* Responsive */
-@media (max-width: 500px) {
-  .ruling-btns, .verdict-actions { grid-template-columns: 1fr; }
-  .score-n { font-size: 52px; }
-  table.lb th:nth-child(4), table.lb td:nth-child(4) { display: none; }
+@media (max-width: 600px) {
+  .ruling-zone { grid-template-columns: 1fr; }
+  .persona-grid { grid-template-columns: 1fr; }
+  .stamp { font-size: 2.5rem; }
+  .topbar { padding: 10px 15px; }
+  .hud-val { font-size: 1rem; }
 }
 </style>
 </head>
 <body>
 
-<div id="screen-welcome" class="screen active">
-  <div class="emblem">
-    <span class="emblem-icon">⚖</span>
-    <h1 class="emblem-title">SOURCE COURT</h1>
-    <p class="emblem-sub">AP Research Edition</p>
-  </div>
-
-  <div class="welcome-card">
-    <h2>All Rise</h2>
-    <p class="welcome-intro">
-      You are the judge. Five sources stand before your court. Cross-examine each one,
-      then rule: <em>Admissible</em> or <em>Dismissed</em>.
-    </p>
-
-    <div class="instructions-box">
-      <h3>How to Play</h3>
-      <ol>
-        <li><strong>Review the Exhibit:</strong> Read the source metadata and excerpt carefully. Hints like "(Peer-Reviewed)" have been removed, so you must dig into the text!</li>
-        <li><strong>Cross-Examine:</strong> Answer the four evaluation questions. If you aren't certain, select "MAYBE".</li>
-        <li><strong>Rule:</strong> Decide if the source is <em>Admissible</em> (scholarly, credible) or <em>Dismissed</em> (biased, unreliable).</li>
-      </ol>
-    </div>
-
-    <div id="welcome-container">
-      <div class="form-group">
-        <label for="inp-name">Your Name</label>
-        <input id="inp-name" type="text" placeholder="Enter your name" maxlength="50">
-      </div>
-      <div class="form-group">
-        <label for="inp-topic">Your Research Question</label>
-        <input id="inp-topic" type="text" placeholder="What are you investigating?" maxlength="120">
-      </div>
-      <button type="button" class="btn-enter" onclick="handleCourtStart()">⚖&nbsp; Enter the Court</button>
-    </div>
-  </div>
-
-  <div class="welcome-footer">
-    <button type="button" class="btn-ghost" onclick="goLeaderboard()">🏛 Hall of Judges</button>
+<!-- MODALS -->
+<div id="aiLoadingModal" class="modal-overlay">
+  <div class="modal-content" style="text-align: center; border-color: var(--admit); background: var(--bg);">
+    <div class="ai-spinner" style="border-top-color: var(--admit); border-color: var(--admit-dim);"></div>
+    <div class="ai-loader" style="color: var(--admit);">AI Director fabricating next docket...</div>
   </div>
 </div>
 
-<div id="screen-source" class="screen"></div>
-<div id="screen-verdict" class="screen"></div>
-<div id="screen-leaderboard" class="screen"></div>
+<div id="benchBookModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-title">Instructions: The Bench Book</div>
+    <p>A judge must evaluate evidence systematically. Use these 4 criteria to determine if a source is admissible for academic research:</p>
+    
+    <div class="def-block">
+      <div class="def-title">1. Authority (Credentials)</div>
+      <div class="def-desc">Is the author qualified to write on this topic? Look for degrees (Ph.D., M.D.), institutional affiliations (universities, reputable organizations), or extensive professional experience in the exact field. A journalist is rarely an "expert" in a scientific field.</div>
+    </div>
+    <div class="def-block">
+      <div class="def-title">2. Currency (Date)</div>
+      <div class="def-desc">Is the information up-to-date? For fast-moving fields like science, medicine, or technology, sources should ideally be published within the last 5-7 years. History or literature can use older sources.</div>
+    </div>
+    <div class="def-block">
+      <div class="def-title">3. Objectivity (Bias & Agenda)</div>
+      <div class="def-desc">Why was this written? To inform, persuade, or sell? Look for strong emotional language, financial conflicts of interest (e.g., an oil company funding a climate study), or obvious political leanings that compromise objectivity.</div>
+    </div>
+    <div class="def-block">
+      <div class="def-title">4. Rigor (Peer-Review)</div>
+      <div class="def-desc">Has the information been vetted? The gold standard is <strong>Peer-Reviewed Academic Journals</strong>. Think tanks and major government reports (like the IPCC or CDC) are also highly reputable. Blogs, Wikipedia, and op-eds are generally not acceptable as primary academic evidence.</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="document.getElementById('benchBookModal').classList.remove('active')">Close Instructions</button>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div id="home" class="screen active">
+  <div class="logo-container">
+    <span class="logo-icon">⚖️</span>
+    <div class="logo">Source Court</div>
+    <div class="subtitle">Survival Mode</div>
+  </div>
+  
+  <div class="home-card">
+    <div class="survival-info">
+      <h3>Survival Mode Rules</h3>
+      <p>Evaluate sources to build your <strong>Judicial Reputation (Score)</strong>. Maintain a hot streak to earn massive multipliers. But beware: make 3 incorrect rulings, and it's <strong>Game Over (Disbarred)</strong>.</p>
+    </div>
+
+    <div class="input-group">
+      <label>Enter Your Name (Take the Oath)</label>
+      <input type="text" id="inp-name" placeholder="Judge's Last Name (e.g., Smith)" autocomplete="off">
+    </div>
+
+    <div class="draft-title">Select Your Playstyle (Judicial Persona)</div>
+    <div class="persona-grid">
+      <div class="persona-card p-auth" onclick="selectPersona('authority')">
+        <div class="p-name">The Detective</div>
+        <div class="p-perk">2x Points: Authority</div>
+        <div class="p-desc">Masters at verifying author credentials.</div>
+      </div>
+      <div class="persona-card p-curr" onclick="selectPersona('currency')">
+        <div class="p-name">The Archivist</div>
+        <div class="p-perk">2x Points: Currency</div>
+        <div class="p-desc">Masters at evaluating publication dates.</div>
+      </div>
+      <div class="persona-card p-bias" onclick="selectPersona('bias')">
+        <div class="p-name">The Skeptic</div>
+        <div class="p-perk">2x Points: Bias</div>
+        <div class="p-desc">Masters at sniffing out hidden agendas.</div>
+      </div>
+      <div class="persona-card p-peer" onclick="selectPersona('peer')">
+        <div class="p-name">The Scholar</div>
+        <div class="p-perk">2x Points: Peer-Review</div>
+        <div class="p-desc">Masters at verifying academic rigor.</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="startGame(false)">⚖️ Play Standard Campaign (Tutorial)</button>
+    <button class="btn btn-secondary" onclick="document.getElementById('benchBookModal').classList.add('active')">📖 How to Play (Instructions & Rules)</button>
+
+    <div class="divider">Custom AI Practice Mode</div>
+    
+    <div class="input-group" style="margin-bottom: 0;">
+      <label style="color: var(--admit);">Enter A Topic For Endless AI Practice</label>
+      <input type="text" id="inp-topic" placeholder="e.g., Social media, Mars colonization, Fast food" style="border-color: var(--admit-dim);">
+      <button class="btn btn-ai" onclick="startGame(true)">✨ Start Custom AI Practice Mode</button>
+    </div>
+  </div>
+</div>
+
+<!-- COURT SCREEN -->
+<div id="court" class="screen">
+  <div class="topbar">
+    <div class="hud-item">
+      <span class="hud-label">Strikes</span>
+      <span class="hud-val" id="hudStrikes">
+        <span class="strike-icon" id="s1">⚖️</span>
+        <span class="strike-icon" id="s2">⚖️</span>
+        <span class="strike-icon" id="s3">⚖️</span>
+      </span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Streak</span>
+      <span class="hud-val" id="hudStreak">0 🔥</span>
+    </div>
+    <div class="hud-item">
+      <span class="hud-label">Score</span>
+      <span class="hud-val" style="color: var(--gold);" id="hudRep">0</span>
+    </div>
+  </div>
+
+  <div class="court-body">
+    <div class="case-file">
+      <div class="cf-header">
+        <h2 class="cf-title" id="cfTitle"></h2>
+        <div class="cf-meta">
+          <span class="meta-k">Author</span><span class="meta-v" id="cfAuthor"></span>
+          <span class="meta-k">Publication</span><span class="meta-v" id="cfPub"></span>
+          <span class="meta-k">Date</span><span class="meta-v" id="cfDate"></span>
+          <span class="meta-k">Type</span><span class="meta-v" id="cfType"></span>
+        </div>
+      </div>
+      <div class="cf-body">
+        <div class="cf-excerpt" id="cfExcerpt"></div>
+      </div>
+    </div>
+
+    <div class="cross-exam">
+      <div class="ce-title">Evidence Gathering (Optional)</div>
+      
+      <div class="q-row">
+        <div class="q-text"><span>1. Authority</span>Does the author possess verifiable credentials or institutional expertise in this specific field?</div>
+        <div class="yn-group">
+          <button class="yn-btn yes" id="btn-q-auth-y" onclick="answerQ('authority', true)">PASSES</button>
+          <button class="yn-btn no" id="btn-q-auth-n" onclick="answerQ('authority', false)">FAILS</button>
+        </div>
+      </div>
+      <div class="q-row">
+        <div class="q-text"><span>2. Currency</span>Is this source sufficiently recent (usually within 5-7 years) to be considered current?</div>
+        <div class="yn-group">
+          <button class="yn-btn yes" id="btn-q-curr-y" onclick="answerQ('currency', true)">PASSES</button>
+          <button class="yn-btn no" id="btn-q-curr-n" onclick="answerQ('currency', false)">FAILS</button>
+        </div>
+      </div>
+      <div class="q-row">
+        <div class="q-text"><span>3. Rigor</span>Was this published in a rigorous, peer-reviewed academic journal or by a highly reputable institution?</div>
+        <div class="yn-group">
+          <button class="yn-btn yes" id="btn-q-peer-y" onclick="answerQ('peer', true)">PASSES</button>
+          <button class="yn-btn no" id="btn-q-peer-n" onclick="answerQ('peer', false)">FAILS</button>
+        </div>
+      </div>
+      <div class="q-row">
+        <div class="q-text"><span>4. Objectivity</span>Is this source objective, free from extreme bias, emotional language, or financial conflict?</div>
+        <div class="yn-group">
+          <button class="yn-btn yes" id="btn-q-bias-y" onclick="answerQ('bias', true)">PASSES</button>
+          <button class="yn-btn no" id="btn-q-bias-n" onclick="answerQ('bias', false)">FAILS</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ruling-zone">
+      <button class="ruling-btn btn-admit" id="btn-admit" onclick="submitRuling(true)">
+        RULE ADMISSIBLE
+        <span>Source is credible & academic</span>
+      </button>
+      <button class="ruling-btn btn-dismiss" id="btn-dismiss" onclick="submitRuling(false)">
+        RULE DISMISSED
+        <span>Source is flawed or biased</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- VERDICT SCREEN -->
+<div id="verdict" class="screen">
+  <div class="verdict-header">
+    <div class="stamp" id="verdictStamp">ADMISSIBLE</div>
+    <div class="promo-status" id="verdictPromo"></div>
+    <div class="score-tally" id="verdictRoundScore">+0 SCORE</div>
+  </div>
+
+  <div class="debrief-box">
+    <div class="debrief-title">Chief Justice Debrief</div>
+    <div class="debrief-text" id="verdictExp"></div>
+    
+    <div class="cross-exam-results" id="ceResultsBox">
+      <!-- Generated via JS -->
+    </div>
+
+    <div id="aiDebriefZone" style="display:none; margin-top: 20px;">
+      <button class="btn btn-ai-debrief" id="btnAskAI" onclick="askAIForDebrief()">✨ Ask AI Director for detailed breakdown</button>
+      <div class="ai-exp-box" id="aiExpBox"></div>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="btnNextCase" onclick="nextCase()">Bring in the Next Source</button>
+</div>
+
+<!-- END SCREEN -->
+<div id="end" class="screen">
+  <div class="end-card">
+    <div class="end-title">MISTRIAL</div>
+    <div class="final-rank">You Have Been Disbarred (3 Strikes)</div>
+    
+    <div class="end-stats-grid">
+      <div class="end-stat-box">
+        <div class="end-stat-value" id="endRep">0</div>
+        <div class="end-stat-label">Total Score</div>
+      </div>
+      <div class="end-stat-box">
+        <div class="end-stat-value" id="endStreak" style="color: #fbbf24;">0</div>
+        <div class="end-stat-label">Best Streak</div>
+      </div>
+    </div>
+    
+    <button class="btn btn-primary" onclick="replayGame()">Return to Main Menu</button>
+  </div>
+</div>
 
 <script>
-/* =======================================================
-   DATA
-   ======================================================= */
-const EXHIBITS = ['A','B','C','D','E'];
-
-const SETS = [
+/* =====================================================================
+   DATA: DEFAULT PROGRESSIVE CASES (TUTORIAL)
+   ===================================================================== */
+const DEFAULT_CASES = [
   {
-    topic: 'Climate Change',
-    sources: [
-      {
-        title: 'Climate Change 2023: Synthesis Report',
-        author: 'Working Group I',
-        publication: 'Global Climate Synthesis Report',
-        date: '2023',
-        type: 'Report',
-        excerpt: '"Human-induced climate change, including more frequent and intense extreme weather events, has caused widespread adverse impacts and related losses and damages to nature and people, beyond natural climate variability. The observed increase in greenhouse gas concentrations since around 1750 is unequivocally caused by human activities."',
-        questions: [
-          { text: 'Is the author or organization an expert in this field?' },
-          { text: 'Is this source recent — published within the last 5–7 years?' },
-          { text: 'Is it peer-reviewed or from a highly reputable institution?' },
-          { text: 'Does the source show significant bias or a potential hidden agenda?' }
-        ],
-        ruling: 'admissible',
-        explanation: 'The IPCC synthesizes work from thousands of climate scientists worldwide. Expert authors, rigorous peer review, institutional accountability, and a 2023 date.'
-      },
-      {
-        title: 'Why Clean Coal Is Still America\'s Energy Backbone',
-        author: 'James R. Whitfield',
-        publication: 'American Energy Forum',
-        date: '2022',
-        type: 'Online Article',
-        excerpt: '"New scrubbing technologies have reduced coal plant emissions by over 90%, yet alarmist projections from environmental advocacy groups continually ignore these innovations. By transitioning to clean coal methodologies, we can maintain grid stability during extreme weather events where renewables typically fail."',
-        questions: [
-          { text: 'Is the author or organization an expert in this field?' },
-          { text: 'Is this source recent — published within the last 5–7 years?' },
-          { text: 'Is it peer-reviewed or from a highly reputable institution?' },
-          { text: 'Does the source show significant bias or a potential hidden agenda?' }
-        ],
-        ruling: 'dismissed',
-        explanation: 'A communications director for an energy lobbying site is not a scientific expert. The organization has a direct financial stake in coal\'s survival — a textbook conflict of interest.'
-      },
-      {
-        title: 'Accelerating Arctic Sea Ice Loss and Its Amplifying Feedback Effects',
-        author: 'Sarah Chen, Marcus Webb',
-        publication: 'Nature Climate Change',
-        date: '2021',
-        type: 'Academic Article',
-        excerpt: '"Satellite observations from 1979–2020 document a 13.1% per-decade decline in Arctic sea ice extent, with statistically significant acceleration after 2007. Albedo feedback loops, triggered by the reduction of highly reflective ice surfaces, amplify regional warming at twice the global mean rate."',
-        questions: [
-          { text: 'Is the author or organization an expert in this field?' },
-          { text: 'Is this source recent — published within the last 5–7 years?' },
-          { text: 'Is it peer-reviewed or from a highly reputable institution?' },
-          { text: 'Does the source show significant bias or a potential hidden agenda?' }
-        ],
-        ruling: 'admissible',
-        explanation: 'Nature Climate Change is one of the world\'s most rigorous peer-reviewed journals. Credentialed Oxford researchers, transparent methodology, and no financial conflicts.'
-      },
-      {
-        title: 'Climate Change — Wikipedia',
-        author: 'Multiple Contributors',
-        publication: 'Wikipedia',
-        date: 'Last edited 2024',
-        type: 'Encyclopedia',
-        excerpt: '"Climate change refers to long-term shifts in global temperatures and weather patterns. Since the mid-20th century, human activities — primarily burning fossil fuels — have been the main driver of climate change. This process releases greenhouse gases, such as carbon dioxide and methane, which trap heat in the Earth\'s atmosphere."',
-        questions: [
-          { text: 'Is the author or organization an expert in this field?' },
-          { text: 'Is this source recent — published within the last 5–7 years?' },
-          { text: 'Is it peer-reviewed or from a highly reputable institution?' },
-          { text: 'Does the source show significant bias or a potential hidden agenda?' }
-        ],
-        ruling: 'dismissed',
-        explanation: 'Wikipedia has no named, credentialed authors and undergoes no peer review. It\'s valuable for orientation — not for evidence. AP Research requires traceable, accountable scholarship.'
-      },
-      {
-        title: 'I Sailed the Northwest Passage. The Ice Is Gone.',
-        author: 'Tyler Cross',
-        publication: 'The New York Times',
-        date: '2023',
-        type: 'Article',
-        excerpt: '"I’ve made three Arctic crossings in my lifetime, and the transformation is staggering. The thick, multi-year ice that once killed early explorers is simply gone, replaced by open water and slush. No scientist with their complex data models needs to tell me what I saw with my own eyes from the deck of my boat."',
-        questions: [
-          { text: 'Is the author or organization an expert in this field?' },
-          { text: 'Is this source recent — published within the last 5–7 years?' },
-          { text: 'Is it peer-reviewed or from a highly reputable institution?' },
-          { text: 'Does the source show significant bias or a potential hidden agenda?' }
-        ],
-        ruling: 'dismissed',
-        explanation: 'Compelling first-person observation — but anecdote is not data. The author has no scientific credentials, the column underwent no peer review, and activist framing signals a one-sided perspective.'
-      }
-    ]
+    title: "The Miracle Berry That Melts Belly Fat Fast",
+    author: "Dr. Wellness (Blogger)",
+    publication: "Holistic Health Daily Blog",
+    date: "2024",
+    type: "Blog Post / Advertisement",
+    excerpt: "\"Big Pharma doesn't want you to know about this Amazonian super-berry! Clinical trials are expensive, so we don't have them yet, but thousands of my customers swear by my $89 supplement. If you truly care about your family's health, buy it today before the government bans it!\"",
+    ansAuthority: false, ansCurrency: true, ansPeer: false, ansBias: false, // Objectivity fails -> ansBias = false
+    isAdmissible: false,
+    explanation: "This is a classic textbook example of an unreliable source. The author has no verifiable academic credentials, there is no peer-reviewed science, and the extreme emotional language reveals a clear financial bias to sell a product."
+  },
+  {
+    title: "Global Sea Level Rise Projections 2020-2050",
+    author: "Dr. Elena Rostova, Ph.D. Climatology",
+    publication: "Nature Climate Change",
+    date: "2023",
+    type: "Peer-Reviewed Academic Journal",
+    excerpt: "\"Using satellite altimetry data from 1993 to 2022, this study projects a median sea-level increase of 0.25 meters by 2050 under the RCP4.5 emissions scenario. Margins of error were calculated using a Monte Carlo simulation. Funding was provided entirely by the National Science Foundation, with no declared conflicts of interest.\"",
+    ansAuthority: true, ansCurrency: true, ansPeer: true, ansBias: true,
+    isAdmissible: true,
+    explanation: "This is the gold standard for academic research. The author is a credentialed expert, the data is current, the journal is heavily peer-reviewed, and the language is objective and strictly factual with transparent funding."
+  },
+  {
+    title: "The Internet's Effect on Adolescent Attention Spans",
+    author: "Dr. Marcus Vance, Cognitive Psychologist",
+    publication: "Journal of Educational Psychology",
+    date: "1998",
+    type: "Peer-Reviewed Academic Journal",
+    excerpt: "\"Our study of 400 high school students indicates that spending more than two hours a week on 'World Wide Web' chat rooms correlates with a 15% decrease in sustained reading focus. As dial-up modems become more prevalent in households, educators must monitor this digital distraction carefully.\"",
+    ansAuthority: true, ansCurrency: false, ansPeer: true, ansBias: true,
+    isAdmissible: false,
+    explanation: "While this source is written by an expert and peer-reviewed, it must be DISMISSED due to lack of currency. In the context of internet technology and social media, a study from 1998 (dial-up modems) is entirely obsolete and irrelevant to modern research."
+  },
+  {
+    title: "Why Nuclear Energy is a Dangerous Distraction",
+    author: "Sarah Jenkins, Communications Director",
+    publication: "The Green Earth Alliance Policy Brief",
+    date: "2024",
+    type: "Think Tank / Advocacy Report",
+    excerpt: "\"Despite industry claims of safety, nuclear power remains a terrifying existential threat to humanity. We must abandon all nuclear projects immediately and funnel those billions into solar and wind. Our organization will continue lobbying Congress until every reactor is shut down.\"",
+    ansAuthority: false, ansCurrency: true, ansPeer: false, ansBias: false,
+    isAdmissible: false,
+    explanation: "This is an advocacy piece, not an academic source. The author is a PR director, not a scientist. The language ('terrifying existential threat') is highly emotional, and the organization's stated purpose is lobbying, revealing a strong political agenda."
   }
 ];
 
-/* =======================================================
-   STATE
-   ======================================================= */
-var AppState = {
-  name: '',
-  topic: '',
-  setIdx: 0,
-  srcIdx: 0,
-  qAnswers: [],
-  rulings: []
+/* =====================================================================
+   GEMINI API INTEGRATION
+   ===================================================================== */
+const apiKey = ""; // Set by execution environment
+
+async function callGeminiAPI(userText, systemText, schema = null) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const payload = {
+    contents: [{ parts: [{ text: userText }] }],
+    systemInstruction: { parts: [{ text: systemText }] }
+  };
+  if (schema) {
+    payload.generationConfig = { responseMimeType: "application/json", responseSchema: schema };
+  }
+  
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      return schema ? JSON.parse(text) : text;
+    } catch (e) {
+      if (attempt === 4) throw e;
+      await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 1000));
+    }
+  }
+}
+
+const aiCaseSchema = {
+  type: "OBJECT",
+  properties: {
+    title: { type: "STRING" },
+    author: { type: "STRING" },
+    publication: { type: "STRING" },
+    date: { type: "STRING" },
+    type: { type: "STRING" },
+    excerpt: { type: "STRING" },
+    ansAuthority: { type: "BOOLEAN", description: "True if author is a verified expert" },
+    ansCurrency: { type: "BOOLEAN", description: "True if published within last 5 years" },
+    ansPeer: { type: "BOOLEAN", description: "True if published in a peer-reviewed or highly reputable source" },
+    ansBias: { type: "BOOLEAN", description: "True if text is objective and free of extreme bias/agenda" },
+    isAdmissible: { type: "BOOLEAN", description: "True if this is a credible academic source" },
+    explanation: { type: "STRING", description: "A 2-sentence explanation of why it is admissible or dismissed based on the 4 criteria." }
+  }
 };
 
-/* =======================================================
-   SCREEN ROUTING
-   ======================================================= */
+/* =====================================================================
+   GAME STATE & SURVIVAL LOGIC
+   ===================================================================== */
+let state = {
+  playerName: "",
+  isCustomMode: false,
+  topic: "",
+  cases: [],
+  currentCaseIdx: 0,
+  currentCaseObj: null,
+  rep: 0,
+  streak: 0,
+  maxStreak: 0,
+  strikes: 0,
+  currentAnswers: { authority: null, currency: null, peer: null, bias: null }
+};
+
+function updateHUD() {
+  document.getElementById("hudRep").textContent = Math.floor(state.rep);
+  
+  const streakEl = document.getElementById("hudStreak");
+  streakEl.textContent = `${state.streak} 🔥`;
+  if (state.streak >= 3) streakEl.className = "hud-val streak-hot";
+  else streakEl.className = "hud-val";
+
+  for(let i=1; i<=3; i++) {
+    const icon = document.getElementById(`s${i}`);
+    if (state.strikes >= i) icon.classList.add('strike-lost');
+    else icon.classList.remove('strike-lost');
+  }
+}
+
+async function startGame(isCustom) {
+  const name = document.getElementById("inp-name").value.trim();
+  if (!name) { alert("Please enter your name to start the game."); return; }
+  
+  state.playerName = name;
+  state.rep = 0;
+  state.streak = 0;
+  state.maxStreak = 0;
+  state.strikes = 0;
+  state.currentCaseIdx = 0;
+  state.isCustomMode = isCustom;
+
+  if (isCustom) {
+    state.topic = document.getElementById("inp-topic").value.trim();
+    if (!state.topic) { alert("Please enter a topic for the custom practice mode."); return; }
+    await fetchNextAICase();
+  } else {
+    state.cases = [...DEFAULT_CASES];
+    state.currentCaseObj = state.cases[0];
+    loadCase();
+  }
+}
+
+async function fetchNextAICase() {
+  document.getElementById("aiLoadingModal").classList.add("active");
+  try {
+    const sysPrompt = `You are an AP Research teacher generating a source evaluation exercise. 
+    Topic: ${state.topic}. 
+    Create a highly realistic source (Title, Author, Pub, Date, Type, Excerpt). Randomly decide if it should be an excellent, admissible peer-reviewed source OR a flawed, dismissable source (e.g. biased blog, outdated study, fake expert, advocacy group). Fill out the boolean answers accurately.`;
+    
+    const customCase = await callGeminiAPI("Generate a new source to evaluate.", sysPrompt, aiCaseSchema);
+    state.currentCaseObj = customCase;
+    document.getElementById("aiLoadingModal").classList.remove("active");
+    loadCase();
+  } catch (e) {
+    document.getElementById("aiLoadingModal").classList.remove("active");
+    alert("The AI Director failed to generate the next docket. Please check your connection.");
+    console.error(e);
+  }
+}
+
 function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById('screen-' + id);
-  if(el) el.classList.add('active');
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
   window.scrollTo(0, 0);
 }
 
-/* =======================================================
-   WELCOME
-   ======================================================= */
-function handleCourtStart() {
-  const name  = document.getElementById('inp-name').value.trim();
-  const topic = document.getElementById('inp-topic').value.trim();
+function loadCase() {
+  const c = state.currentCaseObj;
+  state.currentAnswers = { authority: null, currency: null, peer: null, bias: null };
+
+  // Reset UI
+  document.querySelectorAll('.yn-btn').forEach(b => b.classList.remove('selected'));
   
-  if (!name || !topic) {
-    alert("Please enter both your name and your research question to proceed.");
+  updateHUD();
+  
+  document.getElementById("cfTitle").textContent = c.title;
+  document.getElementById("cfAuthor").textContent = c.author;
+  document.getElementById("cfPub").textContent = c.publication;
+  document.getElementById("cfDate").textContent = c.date;
+  document.getElementById("cfType").textContent = c.type;
+  document.getElementById("cfExcerpt").innerHTML = `"${c.excerpt}"`;
+
+  showScreen("court");
+}
+
+function selectPersona(type) {
+  state.persona = type;
+  document.querySelectorAll('.persona-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.p-${type.substring(0,4)}`).classList.add('selected');
+}
+
+function answerQ(qType, val) {
+  state.currentAnswers[qType] = val;
+  const yBtn = document.getElementById(`btn-q-${qType.substring(0,4)}-y`);
+  const nBtn = document.getElementById(`btn-q-${qType.substring(0,4)}-n`);
+  yBtn.classList.remove('selected'); nBtn.classList.remove('selected');
+  
+  if (val === true) yBtn.classList.add('selected');
+  else nBtn.classList.add('selected');
+}
+
+function submitRuling(playerRuling) {
+  const c = state.currentCaseObj;
+  const rulingCorrect = (playerRuling === c.isAdmissible);
+  
+  let repEarned = 0;
+  
+  if (rulingCorrect) {
+    // Correct Ruling
+    state.streak++;
+    if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+    
+    // Base 50 points + 10% bonus per streak level
+    let multiplier = 1 + (state.streak * 0.1);
+    repEarned = Math.floor(50 * multiplier);
+    
+    // Bonus for optional evidence gathering
+    const checks = [
+      { key: 'authority', correct: c.ansAuthority }, { key: 'currency',  correct: c.ansCurrency },
+      { key: 'peer', correct: c.ansPeer }, { key: 'bias', correct: c.ansBias }
+    ];
+    checks.forEach(chk => {
+      if (state.currentAnswers[chk.key] === chk.correct) {
+        let pts = Math.floor(10 * multiplier);
+        if (state.persona === chk.key) pts *= 2; // Persona double points perk
+        repEarned += pts;
+      }
+    });
+
+    state.rep += repEarned;
+
+  } else {
+    // Incorrect Ruling -> Strike
+    state.strikes++;
+    state.streak = 0; // Reset streak
+  }
+
+  updateHUD();
+  buildVerdictScreen(rulingCorrect, playerRuling, c, repEarned);
+}
+
+function buildVerdictScreen(rulingCorrect, playerRuling, c, repEarned) {
+  const stampEl = document.getElementById("verdictStamp");
+  stampEl.textContent = playerRuling ? "ADMISSIBLE" : "DISMISSED";
+  stampEl.className = `stamp ${rulingCorrect ? 'correct' : 'incorrect'}`;
+
+  const promoEl = document.getElementById("verdictPromo");
+  if (rulingCorrect) {
+    promoEl.textContent = `JUDGMENT UPHELD (+1 STREAK)`;
+    promoEl.className = "promo-status promo-up";
+    document.getElementById("verdictRoundScore").textContent = `+${repEarned} SCORE`;
+  } else {
+    promoEl.textContent = `OBJECTION SUSTAINED (-1 STRIKE)`;
+    promoEl.className = "promo-status promo-down";
+    document.getElementById("verdictRoundScore").textContent = `+0 SCORE`;
+  }
+
+  document.getElementById("verdictExp").innerHTML = `<strong>Actual Ruling: ${c.isAdmissible ? 'Admissible' : 'Dismissed'}.</strong><br>${c.explanation}`;
+  
+  // Show Evidence Feedback
+  const resultsHTML = [];
+  const checks = [
+    { key: 'authority', name: 'Authority', correct: c.ansAuthority },
+    { key: 'currency',  name: 'Currency',  correct: c.ansCurrency },
+    { key: 'peer',      name: 'Rigor', correct: c.ansPeer },
+    { key: 'bias',      name: 'Objectivity',  correct: c.ansBias }
+  ];
+
+  checks.forEach(chk => {
+    const playerAns = state.currentAnswers[chk.key];
+    if (playerAns !== null) {
+      const isCorrect = (playerAns === chk.correct);
+      resultsHTML.push(`
+        <div class="ce-result-item ${isCorrect ? 'r-correct' : 'r-wrong'}">
+          <span class="ce-label">${chk.name}: You guessed ${playerAns ? 'Passes' : 'Fails'} (Actually ${chk.correct ? 'Passes' : 'Fails'})</span>
+        </div>
+      `);
+    }
+  });
+  document.getElementById("ceResultsBox").innerHTML = resultsHTML.length > 0 ? resultsHTML.join("") : "<p style='color: var(--muted); font-size: 0.9rem;'>No evidence gathering attempted.</p>";
+
+  // Setup AI Debrief button
+  document.getElementById("aiDebriefZone").style.display = "block";
+  document.getElementById("aiExpBox").style.display = "none";
+  const btnAI = document.getElementById("btnAskAI");
+  btnAI.style.display = "block";
+  btnAI.textContent = "✨ Ask AI Director for detailed breakdown";
+  btnAI.disabled = false;
+
+  showScreen("verdict");
+}
+
+async function askAIForDebrief() {
+  const c = state.currentCaseObj;
+  const btn = document.getElementById("btnAskAI");
+  const box = document.getElementById("aiExpBox");
+  
+  btn.textContent = "Analyzing source...";
+  btn.disabled = true;
+
+  try {
+    const sysPrompt = `You are a legal/academic mentor. The student just evaluated this source:
+    Title: ${c.title}
+    Excerpt: ${c.excerpt}
+    
+    In 2 or 3 sentences, provide a detailed, encouraging explanation of WHY this source is ${c.isAdmissible ? 'Admissible' : 'Dismissed'} based on its authority, currency, peer-review status, or objectivity.`;
+    
+    const exp = await callGeminiAPI("Analyze this source.", sysPrompt);
+    box.innerHTML = `<strong>✨ AI Chief Justice:</strong> ${exp}`;
+    box.style.display = "block";
+    btn.style.display = "none";
+  } catch (e) {
+    btn.textContent = "Connection lost. Try again.";
+    btn.disabled = false;
+  }
+}
+
+async function nextCase() {
+  if (state.strikes >= 3) {
+    showEnd();
     return;
   }
 
-  AppState.name  = name;
-  AppState.topic = topic;
-  AppState.setIdx = 0; 
-  AppState.srcIdx   = 0;
-  AppState.rulings  = [];
-  AppState.qAnswers = Array.from({ length: 5 }, () => [null, null, null, null]);
-
-  renderSource(0);
-  showScreen('source');
-}
-
-function goLeaderboard() {
-  renderLeaderboard();
-  showScreen('leaderboard');
-}
-
-/* =======================================================
-   SOURCE SCREEN
-   ======================================================= */
-function renderSource(idx) {
-  const set    = SETS[AppState.setIdx];
-  const src    = set.sources[idx];
-  const ex     = EXHIBITS[idx];
-  const total  = set.sources.length;
-  const ans    = AppState.qAnswers[idx];
-  const done   = ans.every(a => a !== null);
-  const pct    = Math.round(((idx + 1) / total) * 100);
-
-  const qsHTML = src.questions.map((q, qi) => {
-    const a = ans[qi];
-    const yc = a === true    ? 'yn-btn sel-yes'   : 'yn-btn';
-    const nc = a === false   ? 'yn-btn sel-no'    : 'yn-btn';
-    const mc = a === 'maybe' ? 'yn-btn sel-maybe' : 'yn-btn';
-    return `
-      <div class="q-row">
-        <div class="q-text">${q.text}</div>
-        <div class="yn-row">
-          <button type="button" class="${yc}" onclick="answerQ(${idx},${qi},true)">YES</button>
-          <button type="button" class="${nc}" onclick="answerQ(${idx},${qi},false)">NO</button>
-          <button type="button" class="${mc}" onclick="answerQ(${idx},${qi},'maybe')">MAYBE</button>
-        </div>
-      </div>`;
-  }).join('');
-
-  const dis  = done ? '' : 'disabled';
-  const hint = done ? '' : `<div class="ruling-hint">Answer all four questions to unlock your ruling</div>`;
-
-  document.getElementById('screen-source').innerHTML = `
-    <div class="topbar">
-      <span class="topbar-logo">⚖ SOURCE COURT</span>
-      <div class="topbar-right">
-        <span class="topbar-progress">Case ${idx + 1} of ${total} &middot; ${set.topic}</span>
-      </div>
-    </div>
-    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-    <div class="source-body">
-      <div class="case-badge-row">
-        <span class="exhibit-tag">Exhibit ${ex}</span>
-        <span class="type-badge">${src.type}</span>
-      </div>
-      <div class="case-file">
-        <div class="case-file-top">
-          <h2 class="source-title">${src.title}</h2>
-          <div class="meta-grid">
-            <span class="meta-k">Author</span><span class="meta-v">${src.author}</span>
-            <span class="meta-k">Published In</span><span class="meta-v">${src.publication}</span>
-            <span class="meta-k">Date</span><span class="meta-v">${src.date}</span>
-          </div>
-        </div>
-        <div class="excerpt-area">
-          <span class="excerpt-kicker">Excerpt</span>
-          <p class="excerpt-quote">${src.excerpt}</p>
-        </div>
-      </div>
-      <div class="cross-exam">
-        <div class="cross-exam-title">Cross-Examination</div>
-        ${qsHTML}
-      </div>
-      <div class="ruling-zone">
-        <div class="ruling-label">Your Ruling</div>
-        <div class="ruling-btns">
-          <button type="button" class="btn-rule btn-admit" ${dis} onclick="submitRuling('admissible')">✓ Admissible</button>
-          <button type="button" class="btn-rule btn-dismiss" ${dis} onclick="submitRuling('dismissed')">✗ Dismissed</button>
-        </div>
-        ${hint}
-      </div>
-    </div>`;
-}
-
-function answerQ(srcIdx, qIdx, val) {
-  AppState.qAnswers[srcIdx][qIdx] = val;
-  renderSource(srcIdx);
-}
-
-function submitRuling(ruling) {
-  AppState.rulings.push(ruling);
-  const next = AppState.srcIdx + 1;
-  if (next < SETS[AppState.setIdx].sources.length) {
-    AppState.srcIdx = next;
-    renderSource(next);
-    window.scrollTo(0, 0);
+  if (state.isCustomMode) {
+    await fetchNextAICase();
   } else {
-    const score = calcScore();
-    saveScoreSafe(AppState.name, AppState.topic, score, SETS[AppState.setIdx].topic);
-    renderVerdict(score);
-    showScreen('verdict');
+    state.currentCaseIdx++;
+    if (state.currentCaseIdx >= state.cases.length) {
+      // Finished tutorial docket -> Give them the win screen, or force them to play endless
+      document.querySelector('.end-title').textContent = "TUTORIAL CLEARED";
+      document.querySelector('.end-title').style.color = "var(--admit)";
+      document.querySelector('.final-rank').textContent = "Tutorial Complete. Ready for the Custom Practice Mode.";
+      document.querySelector('.end-card').style.borderColor = "var(--admit)";
+      document.querySelector('.end-card').style.boxShadow = "0 10px 50px rgba(16, 185, 129, 0.2)";
+      showEndScreenData();
+    } else {
+      state.currentCaseObj = state.cases[state.currentCaseIdx];
+      loadCase();
+    }
   }
 }
 
-function calcScore() {
-  return SETS[AppState.setIdx].sources.reduce(
-    (acc, src, i) => acc + (AppState.rulings[i] === src.ruling ? 1 : 0), 0
-  );
+function showEnd() {
+  document.querySelector('.end-title').textContent = "GAME OVER";
+  document.querySelector('.end-title').style.color = "var(--dismiss)";
+  document.querySelector('.final-rank').textContent = "You Have Been Disbarred (3 Strikes)";
+  document.querySelector('.end-card').style.borderColor = "var(--dismiss)";
+  document.querySelector('.end-card').style.boxShadow = "0 10px 50px rgba(239, 68, 68, 0.2)";
+  showEndScreenData();
 }
 
-/* =======================================================
-   VERDICT SCREEN
-   ======================================================= */
-function renderVerdict(score) {
-  const set   = SETS[AppState.setIdx];
-  const total = set.sources.length;
+function showEndScreenData() {
+  // Anim for rep
+  let currentScore = 0;
+  let targetScore = state.rep;
+  let step = Math.max(1, Math.floor(targetScore / 40));
+  let scoreEl = document.getElementById("endRep");
   
-  const cards = set.sources.map((src, i) => {
-    const correct     = AppState.rulings[i] === src.ruling;
-    const yourRuling  = AppState.rulings[i];
-    const yourChip    = yourRuling === 'admissible' ? 'chip chip-your-a' : 'chip chip-your-d';
-    const expChip     = src.ruling  === 'admissible' ? 'chip chip-exp-a'  : 'chip chip-exp-d';
-    return `
-      <div class="vcard ${correct ? 'vright' : 'vwrong'}">
-        <div class="vstamp ${correct ? 'st-right' : 'st-wrong'}">${correct ? '✓' : '✗'}</div>
-        <div class="vcard-body">
-          <div class="vcard-title">${src.title}</div>
-          <div class="vcard-chips">
-            <span class="${yourChip}">You: ${yourRuling}</span>
-            <span class="${expChip}">Expert: ${src.ruling}</span>
-          </div>
-          <div class="vcard-explanation">${src.explanation}</div>
-        </div>
-      </div>`;
-  }).join('');
+  let timer = setInterval(() => {
+    currentScore += step;
+    if(currentScore >= targetScore) { currentScore = targetScore; clearInterval(timer); }
+    scoreEl.textContent = currentScore;
+  }, 30);
 
-  document.getElementById('screen-verdict').innerHTML = `
-    <div class="verdict-hero">
-      <span class="verdict-hero-icon">⚖</span>
-      <h1>COURT ADJOURNED</h1>
-      <div class="score-wrap">
-        <span class="score-n">${score}</span><span class="score-d">/${total}</span>
-      </div>
-    </div>
-    <div class="verdict-divider">Case Summary</div>
-    <div id="verdict-cards">${cards}</div>
-    <div class="verdict-actions">
-      <button type="button" class="btn-outline" onclick="playAgain()">Try Another Case</button>
-      <button type="button" class="btn-solid" onclick="goLeaderboard()">Hall of Judges</button>
-    </div>`;
+  document.getElementById("endStreak").textContent = `${state.maxStreak} 🔥`;
+  showScreen("end");
 }
 
-function playAgain() {
-  const saved = AppState.name;
-  AppState.srcIdx = 0;
-  AppState.rulings = [];
-  AppState.qAnswers = [];
-  document.getElementById('inp-name').value = saved;
-  document.getElementById('inp-topic').value = '';
-  showScreen('welcome');
-}
-
-/* =======================================================
-   LEADERBOARD (Ultra-Safe Storage for Local Files)
-   ======================================================= */
-const LB_KEY = 'sc_v1_lb';
-
-function saveScoreSafe(name, topic, score, setTopic) {
-  try {
-    let lb = [];
-    if (window.localStorage) {
-      const existing = localStorage.getItem(LB_KEY);
-      if (existing) lb = JSON.parse(existing);
-    }
-    lb.push({ name, topic, score, setTopic, date: new Date().toLocaleDateString() });
-    lb.sort((a, b) => b.score - a.score || 0);
-    if (window.localStorage) {
-      localStorage.setItem(LB_KEY, JSON.stringify(lb.slice(0, 50)));
-    }
-  } catch(e) {
-    console.warn("Local storage disabled by browser security.");
-  }
-}
-
-function loadLBSafe() {
-  try {
-    if (window.localStorage) {
-      return JSON.parse(localStorage.getItem(LB_KEY)) || [];
-    }
-  } catch(e) {
-    console.warn("Local storage disabled by browser security.");
-  }
-  return [];
-}
-
-function renderLeaderboard() {
-  const entries = loadLBSafe();
-  let body = '';
-
-  if (entries.length === 0) {
-    body = `<tr><td colspan="4"><div class="lb-empty"><span class="lb-empty-icon">⚖</span><p>No rulings on record yet.</p></div></td></tr>`;
-  } else {
-    body = entries.map((e, i) => `<tr>
-      <td>#${i + 1}</td><td>${e.name}</td><td><strong>${e.score}/5</strong></td><td>${e.topic}</td>
-    </tr>`).join('');
-  }
-
-  document.getElementById('screen-leaderboard').innerHTML = `
-    <div class="lb-hero"><span class="lb-hero-icon">🏛</span><h1 class="lb-title">HALL OF JUDGES</h1></div>
-    <div class="lb-table-wrap">
-      <table class="lb">
-        <thead><tr><th>Rank</th><th>Judge</th><th>Score</th><th>Topic</th></tr></thead>
-        <tbody>${body}</tbody>
-      </table>
-    </div>
-    <button type="button" class="btn-back-wide" onclick="showScreen('welcome')">← Return to Court</button>
-  `;
+function replayGame() {
+  showScreen("home");
 }
 </script>
 </body>
