@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Lang Synthesis Coach</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom Entrance Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInBottom { from { transform: translateY(2rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(2rem); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .animate-slide-up { animation: slideInBottom 0.5s ease-out forwards; }
+        .animate-slide-right { animation: slideInRight 0.5s ease-out forwards; }
+        .animate-zoom-in { animation: zoomIn 0.3s ease-out forwards; }
+        
+        .decoration-wavy { text-decoration-style: wavy; text-decoration-line: underline; }
+    </style>
+</head>
+<body class="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-indigo-100 via-slate-50 to-purple-100 font-sans text-slate-800 p-4 md:p-8 selection:bg-fuchsia-200 flex flex-col items-center">
+
+    <div class="max-w-4xl w-full space-y-8 animate-fade-in">
+        
+        <!-- Header -->
+        <header class="text-center space-y-4 pt-4 relative">
+            <button id="btn-start-over" class="hidden absolute left-0 top-6 flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors font-semibold bg-white/50 px-4 py-2 rounded-full shadow-sm hover:shadow-md">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Start Over
+            </button>
+            
+            <div class="inline-flex items-center justify-center p-4 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-3xl mb-2 text-white shadow-xl shadow-fuchsia-200/50 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
+                <i data-lucide="brain-circuit" class="w-9 h-9 drop-shadow-md"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-violet-700 to-fuchsia-600 drop-shadow-sm pb-1">
+                Interactive Synthesis Coach
+            </h1>
+            <p class="text-slate-600 max-w-2xl mx-auto text-lg font-medium">
+                Don't just get the answer. Build it yourself. 🛠️
+            </p>
+        </header>
+
+        <!-- STEP 1: INPUT DRAFT -->
+        <section id="step-1" class="bg-white/70 backdrop-blur-xl rounded-[2rem] shadow-xl shadow-purple-100/50 border border-white p-6 md:p-8 relative overflow-hidden group animate-slide-up">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-fuchsia-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 group-hover:opacity-30 transition-opacity duration-700 -z-10 animate-pulse"></div>
+            
+            <div class="space-y-5 relative z-10">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-end gap-3 mb-2">
+                    <label for="student-input" class="block text-xl font-bold text-slate-700 flex items-center gap-2">
+                        <i data-lucide="edit-3" class="w-5 h-5 text-violet-500"></i>
+                        Step 1: Paste your rough draft sentence
+                    </label>
+                    <button id="btn-random-draft" class="flex items-center gap-2 text-sm px-4 py-2 bg-violet-100 text-violet-700 hover:bg-violet-200 hover:shadow-sm rounded-full font-bold transition-all active:scale-95 group/btn">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 group-active/btn:rotate-180 transition-transform duration-500"></i>
+                        Generate Random Draft
+                    </button>
+                </div>
+                <textarea id="student-input" placeholder="e.g., Source A argues that space exploration is too expensive, but Source C says it creates new technology." class="w-full h-36 p-5 text-slate-700 bg-white/50 border-2 border-purple-100 rounded-2xl focus:ring-4 focus:ring-fuchsia-400/20 focus:border-fuchsia-400 outline-none transition-all resize-none text-lg shadow-inner placeholder:text-slate-400"></textarea>
+                <div class="flex justify-end">
+                    <button id="btn-analyze" disabled class="flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-2xl font-bold text-lg hover:from-violet-500 hover:to-fuchsia-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg shadow-fuchsia-200/50 group/btn">
+                        Analyze My Draft
+                        <i data-lucide="chevron-right" class="w-6 h-6 group-hover/btn:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2: CHOOSE STRATEGY -->
+        <section id="step-2" class="hidden space-y-8 animate-slide-right">
+            <!-- Status Tracker (Dynamic) -->
+            <div id="status-tracker" class="p-6 rounded-2xl shadow-md border-2 relative overflow-hidden bg-rose-50 border-rose-200">
+                <div class="flex items-center gap-4 relative z-10">
+                    <div id="status-icon-container" class="p-3 rounded-full shrink-0 bg-rose-100 text-rose-500">
+                        <i id="status-icon" data-lucide="x-circle" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h3 id="status-title" class="text-xl font-extrabold text-rose-800">
+                            Sophistication Check: Source-Plodding Detected 🛑
+                        </h3>
+                        <p id="status-message" class="font-medium mt-1 text-rose-700">
+                            Your sentence is just summarizing the sources. To get the AP point, we need to make an argument. Choose a workshop track below to build a better sentence!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-extrabold tracking-tight text-slate-900 text-center">
+                Step 2: Choose Your Workshop Track
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <button data-strategy="concession" class="strategy-btn bg-white/80 backdrop-blur-sm rounded-[2rem] p-6 shadow-lg border-2 border-transparent hover:border-amber-300 hover:shadow-amber-100 hover:-translate-y-1 transition-all duration-300 text-left group">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl shadow-md">
+                            <i data-lucide="shield-alert" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-extrabold text-xl text-slate-800">The Concession</h3>
+                    </div>
+                    <p class="text-slate-600 font-medium mb-4">Practice acknowledging a counter-argument before dropping your main claim.</p>
+                    <div class="text-amber-600 font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform">Start Builder <i data-lucide="chevron-right" class="w-4 h-4"></i></div>
+                </button>
+
+                <button data-strategy="context" class="strategy-btn bg-white/80 backdrop-blur-sm rounded-[2rem] p-6 shadow-lg border-2 border-transparent hover:border-emerald-300 hover:shadow-emerald-100 hover:-translate-y-1 transition-all duration-300 text-left group">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-gradient-to-br from-emerald-400 to-teal-500 text-white rounded-2xl shadow-md">
+                            <i data-lucide="globe-2" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-extrabold text-xl text-slate-800">The Contextualizer</h3>
+                    </div>
+                    <p class="text-slate-600 font-medium mb-4">Practice zooming out to show why this argument matters in the real world.</p>
+                    <div class="text-emerald-600 font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform">Start Builder <i data-lucide="chevron-right" class="w-4 h-4"></i></div>
+                </button>
+
+                <button data-strategy="synthesis" class="strategy-btn bg-white/80 backdrop-blur-sm rounded-[2rem] p-6 shadow-lg border-2 border-transparent hover:border-violet-300 hover:shadow-violet-100 hover:-translate-y-1 transition-all duration-300 text-left group">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-3 bg-gradient-to-br from-violet-500 to-purple-600 text-white rounded-2xl shadow-md">
+                            <i data-lucide="zap" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="font-extrabold text-xl text-slate-800">The Synthesizer</h3>
+                    </div>
+                    <p class="text-slate-600 font-medium mb-4">Practice forcing two sources to directly interact with each other.</p>
+                    <div class="text-violet-600 font-bold flex items-center gap-1 group-hover:translate-x-2 transition-transform">Start Builder <i data-lucide="chevron-right" class="w-4 h-4"></i></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 3: THE WORKSHOP BUILDER -->
+        <section id="step-3" class="hidden space-y-6 animate-slide-up w-full max-w-3xl mx-auto">
+            
+            <div class="flex items-center gap-4 mb-6">
+                <button id="btn-back-step2" class="p-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-full transition-colors">
+                    <i data-lucide="chevron-right" class="w-6 h-6 rotate-180"></i>
+                </button>
+                <h2 id="step-3-title" class="text-3xl font-extrabold tracking-tight text-slate-900">Builder</h2>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-xl border border-slate-200 p-6 md:p-8 space-y-6">
+                
+                <!-- Concession Form -->
+                <div id="form-concession" class="hidden space-y-6 form-group">
+                    <div class="space-y-2">
+                        <label class="font-bold text-slate-700 flex items-center gap-2">
+                            <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md text-sm">Part 1</span>
+                            What is a valid point the other side makes?
+                        </label>
+                        <input id="conc-part1" type="text" placeholder="e.g., space exploration requires billions of taxpayer dollars" class="builder-input w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-amber-400 outline-none transition-colors" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-bold text-slate-700 flex items-center gap-2">
+                            <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md text-sm">Part 2</span>
+                            What is your stronger, main claim?
+                        </label>
+                        <textarea id="conc-part2" class="builder-input w-full h-24 p-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-amber-400 outline-none transition-colors resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Contextualizer Form -->
+                <div id="form-context" class="hidden space-y-6 form-group">
+                    <div class="space-y-2">
+                        <label class="font-bold text-slate-700 flex items-center gap-2">
+                            <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md text-sm">Part 1</span>
+                            What broader societal, historical, or cultural issue is this about?
+                        </label>
+                        <input id="cont-part1" type="text" placeholder="e.g., humanity's historical drive to discover the unknown" class="builder-input w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-400 outline-none transition-colors" />
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-bold text-slate-700 flex items-center gap-2">
+                            <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md text-sm">Part 2</span>
+                            What is the main argument?
+                        </label>
+                        <textarea id="cont-part2" class="builder-input w-full h-24 p-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-emerald-400 outline-none transition-colors resize-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Synthesis Form -->
+                <div id="form-synthesis" class="hidden space-y-6 form-group">
+                    <div class="space-y-2">
+                        <label class="font-bold text-slate-700 flex items-center gap-2">
+                            <span class="bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md text-sm">Source A</span>
+                            Explain what the first source suggests (without quotes):
+                        </label>
+                        <input id="synth-part1" type="text" placeholder="e.g., excessive internet usage isolates teenagers" class="builder-input w-full p-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-violet-400 outline-none transition-colors" />
+                    </div>
+                    
+                    <div class="space-y-2 pl-6 border-l-4 border-violet-200 py-2">
+                        <label class="font-bold text-slate-700 text-sm">How does Source B react to this?</label>
+                        <select id="synth-verb" class="builder-input p-2 bg-white border-2 border-violet-200 rounded-lg text-violet-800 font-bold outline-none focus:border-violet-500 cursor-pointer">
+                            <option value="complicates">complicates</option>
+                            <option value="challenges">challenges</option>
+                            <option value="echoes">echoes</option>
+                            <option value="substantiates">substantiates</option>
+                            <option value="diverges from">diverges from</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="font-bold text-slate-700 flex items-center gap-2">
+                            <span class="bg-violet-100 text-violet-800 px-2 py-0.5 rounded-md text-sm">Source B</span>
+                            Explain what the second source demonstrates (without quotes):
+                        </label>
+                        <textarea id="synth-part2" placeholder="e.g., online forums create vital support networks" class="builder-input w-full h-24 p-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:border-violet-400 outline-none transition-colors resize-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIVE PREVIEW BOX -->
+            <div id="preview-container" class="mt-8 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden transition-all duration-500 bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-slate-700">
+                
+                <div id="preview-sparkles" class="hidden absolute top-0 right-0 p-4 opacity-30 animate-pulse">
+                    <i data-lucide="sparkles" class="w-24 h-24 text-emerald-400"></i>
+                </div>
+
+                <div class="flex justify-between items-start mb-4">
+                    <h4 class="text-slate-300 font-bold text-sm tracking-widest uppercase flex items-center gap-2">
+                        <i data-lucide="pen-tool" class="w-4 h-4"></i> Live Preview
+                    </h4>
+                    
+                    <!-- Status Indicator -->
+                    <div id="grading-badge" class="flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-sm transition-all duration-500 bg-slate-800 text-slate-400 border border-slate-700">
+                        <i id="grading-badge-icon" data-lucide="scale" class="w-4 h-4"></i>
+                        <span id="grading-badge-text">Awaiting Grading</span>
+                    </div>
+                </div>
+
+                <p id="live-sentence-display" class="text-white text-xl md:text-2xl leading-relaxed font-medium mb-8 relative z-10">
+                    <!-- Dynamic sentence goes here -->
+                </p>
+                
+                <div id="grading-action-area" class="border-t border-slate-700 pt-6 flex justify-end relative z-10">
+                    <button id="btn-submit-grading" class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-bold hover:from-emerald-400 hover:to-teal-400 transition-all active:scale-95 shadow-lg shadow-emerald-500/30">
+                        Submit for Grading <i data-lucide="scale" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <!-- Feedback Area (Hidden initially) -->
+                <div id="feedback-area" class="hidden mt-6 p-6 rounded-xl border-2 relative z-10 animate-zoom-in">
+                    <div class="flex items-start gap-4">
+                        <div id="feedback-icon-container" class="p-3 rounded-full shrink-0">
+                            <i id="feedback-icon" data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-black tracking-widest uppercase mb-1 opacity-70 flex items-center gap-1 text-white">
+                                <i data-lucide="pen-tool" class="w-3 h-3"></i> AP Grader Feedback
+                            </div>
+                            <h4 id="feedback-title" class="text-lg font-bold mb-1"></h4>
+                            <p id="feedback-message" class="text-slate-200 text-sm md:text-base leading-relaxed mb-4"></p>
+                            
+                            <button id="btn-revise" class="hidden text-sm font-bold text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i> Revise Sentence
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // --- APP STATE ---
+        let state = {
+            step: 1,
+            inputText: '',
+            selectedStrategy: null,
+            isSubmitted: false
+        };
+
+        // --- DOM ELEMENTS ---
+        const els = {
+            step1: document.getElementById('step-1'),
+            step2: document.getElementById('step-2'),
+            step3: document.getElementById('step-3'),
+            btnStartOver: document.getElementById('btn-start-over'),
+            
+            studentInput: document.getElementById('student-input'),
+            btnRandom: document.getElementById('btn-random-draft'),
+            btnAnalyze: document.getElementById('btn-analyze'),
+            
+            statusTracker: document.getElementById('status-tracker'),
+            statusIconContainer: document.getElementById('status-icon-container'),
+            statusTitle: document.getElementById('status-title'),
+            statusMessage: document.getElementById('status-message'),
+            strategyBtns: document.querySelectorAll('.strategy-btn'),
+            
+            btnBackStep2: document.getElementById('btn-back-step2'),
+            step3Title: document.getElementById('step-3-title'),
+            formGroups: document.querySelectorAll('.form-group'),
+            builderInputs: document.querySelectorAll('.builder-input'),
+            
+            liveSentenceDisplay: document.getElementById('live-sentence-display'),
+            btnSubmitGrading: document.getElementById('btn-submit-grading'),
+            gradingActionArea: document.getElementById('grading-action-area'),
+            
+            previewContainer: document.getElementById('preview-container'),
+            previewSparkles: document.getElementById('preview-sparkles'),
+            gradingBadge: document.getElementById('grading-badge'),
+            gradingBadgeText: document.getElementById('grading-badge-text'),
+            
+            feedbackArea: document.getElementById('feedback-area'),
+            feedbackIconContainer: document.getElementById('feedback-icon-container'),
+            feedbackTitle: document.getElementById('feedback-title'),
+            feedbackMessage: document.getElementById('feedback-message'),
+            btnRevise: document.getElementById('btn-revise')
+        };
+
+        // --- LOGIC FUNCTIONS ---
+
+        // Input Listener for Enable/Disable
+        els.studentInput.addEventListener('input', (e) => {
+            state.inputText = e.target.value;
+            els.btnAnalyze.disabled = state.inputText.trim().length === 0;
+        });
+
+        // Generate Random Draft
+        els.btnRandom.addEventListener('click', () => {
+            const topics = [
+                { name: "social media", claim1: "causes isolation among teens", claim2: "creates vital support networks for marginalized groups" },
+                { name: "standardized testing", claim1: "fails to accurately measure student intelligence", claim2: "provides a necessary objective baseline for college admissions" },
+                { name: "space exploration", claim1: "is a waste of money that should be spent on Earth", claim2: "drives technological innovation that benefits everyone" },
+                { name: "universal basic income", claim1: "would disincentivize people from working", claim2: "would eliminate extreme poverty and boost the economy" },
+                { name: "remote work", claim1: "destroys company culture and collaboration", claim2: "significantly improves employee mental health and productivity" },
+                { name: "artificial intelligence", claim1: "will lead to massive job displacement", claim2: "will create new industries and elevate human potential" }
+            ];
+
+            const verbs1 = ["argues", "says", "claims", "points out", "states", "suggests"];
+            const verbs2 = ["argues", "says", "claims", "counters", "states", "suggests"];
+            const transitions = ["but", "however,", "and", "yet"];
+            const sources1 = ["Source A", "Source 1", "The first passage", "The author of Source A"];
+            const sources2 = ["Source B", "Source 2", "the second passage", "Source C"];
+
+            const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            const topic = getRandom(topics);
+
+            let generatedText = `${getRandom(sources1)} ${getRandom(verbs1)} that ${topic.name} ${topic.claim1}, ${getRandom(transitions)} ${getRandom(sources2)} ${getRandom(verbs2)} that it ${topic.claim2}.`;
+            generatedText = generatedText.charAt(0).toUpperCase() + generatedText.slice(1);
+            
+            els.studentInput.value = generatedText;
+            state.inputText = generatedText;
+            els.btnAnalyze.disabled = false;
+        });
+
+        // Analyze Draft
+        els.btnAnalyze.addEventListener('click', () => {
+            const lowerText = state.inputText.toLowerCase();
+            const sophisticatedWords = ['while', 'although', 'despite', 'complicates', 'diverges', 'however', 'conversely', 'illustrates'];
+            const userHasPoint = sophisticatedWords.some(word => lowerText.includes(word));
+            
+            // Update Step 2 Tracker UI
+            if (userHasPoint) {
+                els.statusTracker.className = "p-6 rounded-2xl shadow-md border-2 relative overflow-hidden bg-emerald-50 border-emerald-200";
+                els.statusIconContainer.className = "p-3 rounded-full shrink-0 bg-emerald-100 text-emerald-600";
+                els.statusIconContainer.innerHTML = '<i data-lucide="award" class="w-8 h-8"></i>';
+                els.statusTitle.className = "text-xl font-extrabold text-emerald-800";
+                els.statusTitle.innerText = "Sophistication Check: You are on track! 🎉";
+                els.statusMessage.className = "font-medium mt-1 text-emerald-700";
+                els.statusMessage.innerText = "Great job using complex transition words! Let's enter the workshop to practice structuring these arguments even better.";
+            } else {
+                els.statusTracker.className = "p-6 rounded-2xl shadow-md border-2 relative overflow-hidden bg-rose-50 border-rose-200";
+                els.statusIconContainer.className = "p-3 rounded-full shrink-0 bg-rose-100 text-rose-500";
+                els.statusIconContainer.innerHTML = '<i data-lucide="x-circle" class="w-8 h-8"></i>';
+                els.statusTitle.className = "text-xl font-extrabold text-rose-800";
+                els.statusTitle.innerText = "Sophistication Check: Source-Plodding Detected 🛑";
+                els.statusMessage.className = "font-medium mt-1 text-rose-700";
+                els.statusMessage.innerText = "Your sentence is just summarizing the sources. To get the AP point, we need to make an argument. Choose a workshop track below to build a better sentence!";
+            }
+
+            lucide.createIcons();
+
+            // Transition to Step 2
+            state.step = 2;
+            updateStepVisibility();
+        });
+
+        // Start Strategy Builder
+        els.strategyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const strategy = btn.getAttribute('data-strategy');
+                state.selectedStrategy = strategy;
+                state.isSubmitted = false;
+
+                // Reset forms
+                document.getElementById('conc-part1').value = '';
+                document.getElementById('cont-part1').value = '';
+                document.getElementById('synth-part1').value = '';
+                document.getElementById('synth-part2').value = '';
+                document.getElementById('synth-verb').value = 'complicates';
+
+                // Process original text for auto-fill
+                let cleanText = state.inputText.trim();
+                if (cleanText.endsWith('.')) cleanText = cleanText.slice(0, -1);
+                if (cleanText.length > 0 && cleanText[0] !== '"' && cleanText[0] !== 'I') {
+                    cleanText = cleanText.charAt(0).toLowerCase() + cleanText.slice(1);
+                }
+
+                // Show correct form & autofill
+                els.formGroups.forEach(f => f.classList.add('hidden'));
+                
+                if (strategy === 'concession') {
+                    els.step3Title.innerText = "Concession Builder";
+                    document.getElementById('form-concession').classList.remove('hidden');
+                    document.getElementById('conc-part2').value = cleanText;
+                } else if (strategy === 'context') {
+                    els.step3Title.innerText = "Contextualizer Builder";
+                    document.getElementById('form-context').classList.remove('hidden');
+                    document.getElementById('cont-part2').value = cleanText;
+                } else if (strategy === 'synthesis') {
+                    els.step3Title.innerText = "Synthesizer Builder";
+                    document.getElementById('form-synthesis').classList.remove('hidden');
+                }
+
+                state.step = 3;
+                updatePreview();
+                resetFeedbackUI();
+                updateStepVisibility();
+            });
+        });
+
+        // Live Preview Updater
+        els.builderInputs.forEach(input => {
+            input.addEventListener('input', updatePreview);
+            input.addEventListener('change', updatePreview);
+        });
+
+        function getBuilderValues() {
+            if (state.selectedStrategy === 'concession') {
+                return { p1: document.getElementById('conc-part1').value, p2: document.getElementById('conc-part2').value, verb: '' };
+            } else if (state.selectedStrategy === 'context') {
+                return { p1: document.getElementById('cont-part1').value, p2: document.getElementById('cont-part2').value, verb: '' };
+            } else if (state.selectedStrategy === 'synthesis') {
+                return { 
+                    p1: document.getElementById('synth-part1').value, 
+                    p2: document.getElementById('synth-part2').value, 
+                    verb: document.getElementById('synth-verb').value 
+                };
+            }
+            return { p1: '', p2: '', verb: '' };
+        }
+
+        function updatePreview() {
+            const { p1, p2, verb } = getBuilderValues();
+            const textP1 = p1 || "___________";
+            const textP2 = p2 || "___________";
+            
+            let html = "";
+            if (state.selectedStrategy === 'concession') {
+                html = `<strong>While it is true that</strong> <span class="${p1 ? 'text-amber-300' : 'text-slate-500'}">${textP1}</span>, <strong>this perspective overlooks the reality that</strong> <span class="${p2 ? 'text-amber-300' : 'text-slate-500'}">${textP2}</span>.`;
+            } else if (state.selectedStrategy === 'context') {
+                html = `<strong>When viewed through the broader lens of</strong> <span class="${p1 ? 'text-emerald-300' : 'text-slate-500'}">${textP1}</span>, <strong>it becomes clear that</strong> <span class="${p2 ? 'text-emerald-300' : 'text-slate-500'}">${textP2}</span>.`;
+            } else if (state.selectedStrategy === 'synthesis') {
+                html = `<strong>While Source A suggests</strong> <span class="${p1 ? 'text-violet-300' : 'text-slate-500'}">${textP1}</span>, <strong>Source B</strong> <span class="text-fuchsia-400 decoration-wavy underline">${verb}</span> <strong>this perspective by demonstrating that</strong> <span class="${p2 ? 'text-violet-300' : 'text-slate-500'}">${textP2}</span>.`;
+            }
+
+            els.liveSentenceDisplay.innerHTML = html;
+        }
+
+        // --- HARSH AP GRADING LOGIC ---
+        els.btnSubmitGrading.addEventListener('click', () => {
+            state.isSubmitted = true;
+            els.gradingActionArea.classList.add('hidden');
+            
+            const { p1: rawP1, p2: rawP2, verb } = getBuilderValues();
+            const p1 = rawP1.trim();
+            const p2 = rawP2.trim();
+            const p1Lower = p1.toLowerCase();
+            const p2Lower = p2.toLowerCase();
+
+            let passed = false;
+            let fbTitle = "";
+            let fbMsg = "";
+
+            // 1. Length Check
+            const p1Words = p1.split(' ').filter(w => w.length > 0);
+            const p2Words = p2.split(' ').filter(w => w.length > 0);
+
+            if (p1Words.length < 6 || p2Words.length < 6) {
+                fbTitle = "Surface-Level Analysis 🛑";
+                fbMsg = "AP Readers need more depth to award the Sophistication Point. A quick 3-4 word phrase isn't enough to demonstrate complex understanding. Add specific details, implications, or 'how/why' explanations to fully flesh out both blanks.";
+            } else {
+                // 2. Weak Vocab Check
+                const combinedText = ` ${p1Lower} ${p2Lower} `; 
+                const weakWords = [' says ', ' things ', ' stuff ', ' very ', ' a lot ', ' good ', ' bad ', ' sad ', ' happy ', ' dumb ', ' stupid ', ' talks about '];
+                const foundWeakWord = weakWords.find(word => combinedText.includes(word));
+                
+                if (foundWeakWord) {
+                    fbTitle = "Basic Diction Detected 📉";
+                    fbMsg = `You used a low-level phrase: '${foundWeakWord.trim()}'. Sophistication requires academic language. Elevate your vocabulary! Replace weak words with precise analytical verbs or strong adjectives.`;
+                } else if (state.selectedStrategy === 'context' && (p1Lower.includes('source') || p1Lower.includes('article') || p1Lower.includes('author'))) {
+                    // 3. Context Trap
+                    fbTitle = "Stuck in the Sources 📚";
+                    fbMsg = "For the Contextualizer, your broader issue (Part 1) needs to be about the REAL WORLD. Don't mention 'Source A' or 'the article' here! Zoom out. Talk about society, history, economics, or human nature.";
+                } else {
+                    // 4. Quote Dropping Trap
+                    const p1Quotes = (p1.match(/"/g) || []).length;
+                    const p2Quotes = (p2.match(/"/g) || []).length;
+                    if (p1Quotes >= 2 || p2Quotes >= 2) {
+                        fbTitle = "Quote-Dropping Risk ✂️";
+                        fbMsg = "You are relying too heavily on direct quotes in your blanks. Sophistication comes from YOUR voice. Paraphrase the source's idea in your own words, or embed a much shorter quote seamlessly into your own sentence structure.";
+                    } else {
+                        // PASS
+                        passed = true;
+                        fbTitle = "Sophistication Point: SECURED! 🏆";
+                        if (state.selectedStrategy === 'concession') fbMsg = "Exceptional. You successfully acknowledged a limitation and pivoted to a stronger claim with academic precision. This nuance is exactly what earns the point.";
+                        if (state.selectedStrategy === 'context') fbMsg = "Brilliant. You perfectly zoomed out to show the real-world exigence of your argument without getting bogged down in the sources. Great situational awareness.";
+                        if (state.selectedStrategy === 'synthesis') fbMsg = `Masterful. You forced the sources into a direct conversation using the strong verb '${verb}' and provided deep analysis for both. The ultimate AP flex!`;
+                    }
+                }
+            }
+
+            renderFeedback(passed, fbTitle, fbMsg);
+        });
+
+        function renderFeedback(passed, title, msg) {
+            els.feedbackArea.classList.remove('hidden');
+            els.feedbackTitle.innerText = title;
+            els.feedbackMessage.innerText = msg;
+            
+            if (passed) {
+                // Success styling
+                els.previewContainer.className = "mt-8 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden transition-all duration-500 bg-gradient-to-br from-emerald-900 to-slate-900 border-2 border-emerald-500/50";
+                els.previewSparkles.classList.remove('hidden');
+                
+                els.gradingBadge.className = "flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-sm transition-all duration-500 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50";
+                els.gradingBadge.innerHTML = '<i data-lucide="check-circle-2" class="w-4 h-4"></i> PASSED';
+                
+                els.feedbackArea.className = "mt-6 p-6 rounded-xl border-2 relative z-10 animate-zoom-in bg-emerald-900/80 border-emerald-500/50";
+                els.feedbackIconContainer.className = "p-3 rounded-full shrink-0 bg-emerald-500 text-slate-900";
+                els.feedbackIconContainer.innerHTML = '<i data-lucide="check-circle-2" class="w-6 h-6"></i>';
+                els.feedbackTitle.className = "text-lg font-bold mb-1 text-emerald-300";
+                
+                els.btnRevise.classList.add('hidden');
+            } else {
+                // Fail styling
+                els.previewContainer.className = "mt-8 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden transition-all duration-500 bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-slate-700";
+                els.previewSparkles.classList.add('hidden');
+
+                els.gradingBadge.className = "flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-sm transition-all duration-500 bg-rose-500/20 text-rose-400 border border-rose-500/50";
+                els.gradingBadge.innerHTML = '<i data-lucide="x-circle" class="w-4 h-4"></i> FAILED';
+
+                els.feedbackArea.className = "mt-6 p-6 rounded-xl border-2 relative z-10 animate-zoom-in bg-rose-900/80 border-rose-500/50";
+                els.feedbackIconContainer.className = "p-3 rounded-full shrink-0 bg-rose-500 text-white";
+                els.feedbackIconContainer.innerHTML = '<i data-lucide="alert-circle" class="w-6 h-6"></i>';
+                els.feedbackTitle.className = "text-lg font-bold mb-1 text-rose-300";
+                
+                els.btnRevise.classList.remove('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        // Revise Button
+        els.btnRevise.addEventListener('click', resetFeedbackUI);
+
+        function resetFeedbackUI() {
+            state.isSubmitted = false;
+            els.feedbackArea.classList.add('hidden');
+            els.gradingActionArea.classList.remove('hidden');
+            
+            // Reset Preview container styling
+            els.previewContainer.className = "mt-8 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden transition-all duration-500 bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-slate-700";
+            els.previewSparkles.classList.add('hidden');
+            els.gradingBadge.className = "flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-sm transition-all duration-500 bg-slate-800 text-slate-400 border border-slate-700";
+            els.gradingBadge.innerHTML = '<i data-lucide="scale" class="w-4 h-4"></i> Awaiting Grading';
+            lucide.createIcons();
+        }
+
+        // Global Navigation
+        els.btnBackStep2.addEventListener('click', () => {
+            state.step = 2;
+            updateStepVisibility();
+        });
+
+        els.btnStartOver.addEventListener('click', () => {
+            state.step = 1;
+            state.inputText = '';
+            els.studentInput.value = '';
+            els.btnAnalyze.disabled = true;
+            updateStepVisibility();
+        });
+
+        function updateStepVisibility() {
+            els.btnStartOver.classList.toggle('hidden', state.step === 1);
+            
+            els.step1.classList.add('hidden');
+            els.step2.classList.add('hidden');
+            els.step3.classList.add('hidden');
+
+            if (state.step === 1) {
+                els.step1.classList.remove('hidden');
+            } else if (state.step === 2) {
+                els.step2.classList.remove('hidden');
+            } else if (state.step === 3) {
+                els.step3.classList.remove('hidden');
+            }
+        }
+
+    </script>
+</body>
+</html>
