@@ -17,8 +17,9 @@
     --gold: #d4af37;
     --blue: #38bdf8;
     --orange: #fb923c;
-   --yellow: #facc15;
-   --purple: #a855f7;
+    --yellow: #facc15;
+    --purple: #a855f7;
+    --red: #ef4444; /* Added red for the Arena */
   }
 
   body {
@@ -156,18 +157,24 @@
   .app-card.roast:hover .app-title { color: var(--orange); }
   .app-card.roast:hover .app-badge { background: rgba(251, 146, 60, 0.15); color: var(--orange); }
 
-/* Line of Reasoning Detective (Yellow) */
+  /* Line of Reasoning Detective (Yellow) */
   .app-card.detective:hover { border-color: var(--yellow); box-shadow: 0 10px 40px rgba(250, 204, 21, 0.2); }
   .app-card.detective:hover::before { background: var(--yellow); }
   .app-card.detective:hover .app-title { color: var(--yellow); }
   .app-card.detective:hover .app-badge { background: rgba(250, 204, 21, 0.15); color: var(--yellow); }
 
-/* Interactive Synthesis Coach (Purple) */
-.app-card.coach:hover { border-color: var(--purple); box-shadow: 0 10px 40px rgba(168, 85, 247, 0.2); }
-.app-card.coach:hover::before { background: var(--purple); }
-.app-card.coach:hover .app-title { color: var(--purple); }
-.app-card.coach:hover .app-badge { background: rgba(168, 85, 247, 0.15); color: var(--purple); }
- 
+  /* Interactive Synthesis Coach (Purple) */
+  .app-card.coach:hover { border-color: var(--purple); box-shadow: 0 10px 40px rgba(168, 85, 247, 0.2); }
+  .app-card.coach:hover::before { background: var(--purple); }
+  .app-card.coach:hover .app-title { color: var(--purple); }
+  .app-card.coach:hover .app-badge { background: rgba(168, 85, 247, 0.15); color: var(--purple); }
+
+  /* Rhetoric Arena (Red) */
+  .app-card.arena:hover { border-color: var(--red); box-shadow: 0 10px 40px rgba(239, 68, 68, 0.2); }
+  .app-card.arena:hover::before { background: var(--red); }
+  .app-card.arena:hover .app-title { color: var(--red); }
+  .app-card.arena:hover .app-badge { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+  
   @media (max-width: 600px) {
     .app-grid { grid-template-columns: 1fr; }
   }
@@ -204,20 +211,27 @@
       <div class="app-badge">Skill Development</div>
     </a>
 
- <a href="LineOfReasoningDetective.html" class="app-card Detective">
+    <a href="LineOfReasoningDetective.html" class="app-card detective">
       <div class="app-icon">🕵️</div>
       <div class="app-title">Line of Reasoning Detective</div>
-      <div class="app-desc">Solve mysteries through development of theses, claims, pieces of evidence, and commentary</div>
+      <div class="app-desc">Solve mysteries through development of theses, claims, pieces of evidence, and commentary.</div>
       <div class="app-badge">Line of Reasoning Development</div>
     </a>
 
-    <a href="InteractiveSynthesisCoach.html" class="app-card Coach">
+    <a href="InteractiveSynthesisCoach.html" class="app-card coach">
       <div class="app-icon">🎓</div>
       <div class="app-title">Interactive Synthesis Coach</div>
-      <div class="app-desc">Learn how to achieve that sophistication point</div>
+      <div class="app-desc">Learn how to achieve that sophistication point.</div>
       <div class="app-badge">Sophistication</div>
     </a>
-   
+
+    <a href="Rhetoric%20Arena/index.html" class="app-card arena">
+      <div class="app-icon">🏟️</div>
+      <div class="app-title">Rhetoric Arena</div>
+      <div class="app-desc">Step into the arena to test your skills in a brand new challenge.</div>
+      <div class="app-badge">Skill Development</div>
+    </a>
+    
   </div>
 
 </body>
