@@ -48,44 +48,86 @@
     text-align: center;
     animation: shake 0.4s ease;
   }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeUp 0.4s ease-out; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Modals */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(5, 8, 20, 0.9); backdrop-filter: blur(5px);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-content {
+    background: var(--surface); border: 1px solid var(--gold);
+    border-radius: var(--radius-lg); padding: 2.5rem; max-width: 600px; width: 90%;
+    box-shadow: 0 10px 50px rgba(212, 175, 55, 0.2); text-align: left;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title {
+    color: var(--gold); font-size: 1.5rem; font-weight: 900;
+    text-transform: uppercase; margin-bottom: 1rem; text-align: center;
+  }
+  .def-block { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid var(--gold); }
+  .def-title { font-weight: 900; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 5px; color: var(--gold); }
+  
+  .ai-spinner {
+    width: 60px; height: 60px; margin: 0 auto 20px auto;
+    border: 4px solid rgba(16, 185, 129, 0.2); border-top-color: var(--admit);
+    border-radius: 50%; animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
 <div id="aiLoadingModal" class="modal-overlay">
   <div class="modal-content" style="text-align: center; border-color: var(--admit); background: var(--bg);">
-    <div class="ai-spinner" style="border-top-color: var(--admit); border-color: var(--admit-dim);"></div>
-    <div class="ai-loader" style="color: var(--admit);">AI Director fabricating next docket...</div>
+    <div class="ai-spinner"></div>
+    <div style="color: var(--admit); font-weight: bold; letter-spacing: 0.1em; text-transform: uppercase;">AI Director fabricating next docket...</div>
   </div>
 </div>
 
 <div id="benchBookModal" class="modal-overlay">
   <div class="modal-content">
     <div class="modal-title">Instructions: The Bench Book</div>
-    <p>A judge must evaluate evidence systematically. Use these 4 criteria to determine if a source is admissible for academic research:</p>
+    <p style="color: var(--muted); margin-bottom: 1rem;">A judge must evaluate evidence systematically. Use these 4 criteria to determine if a source is admissible for academic research:</p>
     
     <div class="def-block">
       <div class="def-title">1. Authority (Credentials)</div>
-      <div class="def-desc">Is the author qualified to write on this topic? Look for degrees (Ph.D., M.D.), institutional affiliations, or extensive professional experience.</div>
+      <div style="color: var(--muted); font-size: 0.95rem;">Is the author qualified to write on this topic? Look for degrees (Ph.D., M.D.), institutional affiliations, or extensive professional experience.</div>
     </div>
     <div class="def-block">
       <div class="def-title">2. Currency (Date)</div>
-      <div class="def-desc">Is the information up-to-date? For fast-moving fields like science or technology, sources should ideally be published within the last 5-7 years.</div>
+      <div style="color: var(--muted); font-size: 0.95rem;">Is the information up-to-date? For fast-moving fields like science or technology, sources should ideally be published within the last 5-7 years.</div>
     </div>
     <div class="def-block">
       <div class="def-title">3. Objectivity (Bias & Agenda)</div>
-      <div class="def-desc">Why was this written? To inform, persuade, or sell? Look for strong emotional language or financial conflicts of interest.</div>
+      <div style="color: var(--muted); font-size: 0.95rem;">Why was this written? To inform, persuade, or sell? Look for strong emotional language or financial conflicts of interest.</div>
     </div>
     <div class="def-block">
       <div class="def-title">4. Rigor (Peer-Review)</div>
-      <div class="def-desc">Has the information been vetted? The gold standard is <strong>Peer-Reviewed Academic Journals</strong> or major government reports.</div>
+      <div style="color: var(--muted); font-size: 0.95rem;">Has the information been vetted? The gold standard is <strong>Peer-Reviewed Academic Journals</strong> or major government reports.</div>
     </div>
 
     <button class="button primary" style="width: 100%; margin-top: 15px;" onclick="document.getElementById('benchBookModal').classList.remove('active')">Close Instructions</button>
   </div>
 </div>
 
-<div id="home" class="screen active" style="align-content: center; max-width: 700px; margin: 0 auto; padding: 40px 20px;">
+<div id="home" class="screen active" style="max-width: 700px; margin: 0 auto; padding: 40px 20px;">
   <div style="text-align: center; margin-bottom: 30px;">
     <span style="font-size: 4rem; display: block; margin-bottom: 10px; filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5));">⚖️</span>
     <div style="font-size: 3rem; font-weight: 900; letter-spacing: 0.1em; color: var(--gold); text-transform: uppercase; font-family: var(--display);">Source Court</div>
@@ -144,14 +186,14 @@
       
       <div style="display: grid; gap: 10px;">
         <input type="text" id="inp-topic" placeholder="Enter topic: e.g., Fast food, Social media" style="border-color: rgba(16, 185, 129, 0.4);">
-        <button class="button" style="background: linear-gradient(135deg, #4ade80, #0d9488); color: #000;" onclick="startGame(true)">✨ Generate Endless AI Docket</button>
+        <button class="button" style="background: linear-gradient(135deg, #4ade80, #0d9488); color: #000; border: none;" onclick="startGame(true)">✨ Generate Endless AI Docket</button>
       </div>
     </div>
 
   </div>
 </div>
 
-<div id="court" class="screen" style="display: none; max-width: 900px; margin: 0 auto; padding-top: 20px;">
+<div id="court" class="screen" style="max-width: 900px; margin: 0 auto; padding-top: 20px;">
   <div class="topbar">
     <div style="text-align: center;">
       <div class="eyebrow" style="color: var(--muted);">Strikes</div>
@@ -230,7 +272,7 @@
   <div style="height: 100px;"></div>
 </div>
 
-<div id="verdict" class="screen" style="display: none; max-width: 700px; margin: 0 auto; padding: 40px 20px;">
+<div id="verdict" class="screen" style="max-width: 700px; margin: 0 auto; padding: 40px 20px;">
   <div style="text-align: center; margin-bottom: 40px;">
     <div class="stamp" id="verdictStamp"></div>
     <div id="verdictPromo" style="display: inline-block; padding: 8px 16px; border-radius: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 15px;"></div>
@@ -252,9 +294,9 @@
   <button class="button primary" style="width: 100%; padding: 20px; font-size: 1.2rem;" onclick="nextCase()">Bring in the Next Source</button>
 </div>
 
-<div id="end" class="screen" style="display: none; align-content: center; max-width: 500px; margin: 0 auto; text-align: center; padding: 20px;">
-  <div class="panel" id="endCard" style="padding: 50px 30px;">
-    <div style="font-size: 3rem; font-weight: 900; text-transform: uppercase; font-family: var(--display); margin-bottom: 10px;" id="endTitle">MISTRIAL</div>
+<div id="end" class="screen" style="max-width: 500px; margin: 0 auto; text-align: center; padding: 20px;">
+  <div class="panel" id="endCard" style="padding: 50px 30px; margin-top: 40px;">
+    <div style="font-size: 3rem; font-weight: 900; text-transform: uppercase; font-family: var(--display); margin-bottom: 10px; color: var(--dismiss);" id="endTitle">MISTRIAL</div>
     <div style="color: var(--muted); font-size: 1.2rem; margin-bottom: 30px;" id="endRank">You Have Been Disbarred (3 Strikes)</div>
     
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
@@ -272,7 +314,371 @@
   </div>
 </div>
 
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script>
+const DEFAULT_CASES = [
+  {
+    title: "The Miracle Berry That Melts Belly Fat Fast",
+    author: "Dr. Wellness (Blogger)",
+    publication: "Holistic Health Daily Blog",
+    date: "2024",
+    type: "Blog Post / Advertisement",
+    excerpt: "\"Big Pharma doesn't want you to know about this Amazonian super-berry! Clinical trials are expensive, so we don't have them yet, but thousands of my customers swear by my $89 supplement. If you truly care about your family's health, buy it today before the government bans it!\"",
+    ansAuthority: false, ansCurrency: true, ansPeer: false, ansBias: false,
+    isAdmissible: false,
+    explanation: "This is a classic textbook example of an unreliable source. The author has no verifiable academic credentials, there is no peer-reviewed science, and the extreme emotional language reveals a clear financial bias to sell a product."
+  },
+  {
+    title: "Global Sea Level Rise Projections 2020-2050",
+    author: "Dr. Elena Rostova, Ph.D. Climatology",
+    publication: "Nature Climate Change",
+    date: "2023",
+    type: "Peer-Reviewed Academic Journal",
+    excerpt: "\"Using satellite altimetry data from 1993 to 2022, this study projects a median sea-level increase of 0.25 meters by 2050 under the RCP4.5 emissions scenario. Margins of error were calculated using a Monte Carlo simulation. Funding was provided entirely by the National Science Foundation, with no declared conflicts of interest.\"",
+    ansAuthority: true, ansCurrency: true, ansPeer: true, ansBias: true,
+    isAdmissible: true,
+    explanation: "This is the gold standard for academic research. The author is a credentialed expert, the data is current, the journal is heavily peer-reviewed, and the language is objective and strictly factual with transparent funding."
+  },
+  {
+    title: "The Internet's Effect on Adolescent Attention Spans",
+    author: "Dr. Marcus Vance, Cognitive Psychologist",
+    publication: "Journal of Educational Psychology",
+    date: "1998",
+    type: "Peer-Reviewed Academic Journal",
+    excerpt: "\"Our study of 400 high school students indicates that spending more than two hours a week on 'World Wide Web' chat rooms correlates with a 15% decrease in sustained reading focus. As dial-up modems become more prevalent in households, educators must monitor this digital distraction carefully.\"",
+    ansAuthority: true, ansCurrency: false, ansPeer: true, ansBias: true,
+    isAdmissible: false,
+    explanation: "While this source is written by an expert and peer-reviewed, it must be DISMISSED due to lack of currency. In the context of internet technology and social media, a study from 1998 (dial-up modems) is entirely obsolete and irrelevant to modern research."
+  },
+  {
+    title: "Why Nuclear Energy is a Dangerous Distraction",
+    author: "Sarah Jenkins, Communications Director",
+    publication: "The Green Earth Alliance Policy Brief",
+    date: "2024",
+    type: "Think Tank / Advocacy Report",
+    excerpt: "\"Despite industry claims of safety, nuclear power remains a terrifying existential threat to humanity. We must abandon all nuclear projects immediately and funnel those billions into solar and wind. Our organization will continue lobbying Congress until every reactor is shut down.\"",
+    ansAuthority: false, ansCurrency: true, ansPeer: false, ansBias: false,
+    isAdmissible: false,
+    explanation: "This is an advocacy piece, not an academic source. The author is a PR director, not a scientist. The language ('terrifying existential threat') is highly emotional, and the organization's stated purpose is lobbying, revealing a strong political agenda."
+  }
+];
+
+const apiKey = ""; 
+
+async function callGeminiAPI(userText, systemText, schema = null) {
+  if (!apiKey) throw new Error("No API key provided.");
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const payload = {
+    contents: [{ parts: [{ text: userText }] }],
+    systemInstruction: { parts: [{ text: systemText }] }
+  };
+  if (schema) {
+    payload.generationConfig = { responseMimeType: "application/json", responseSchema: schema };
+  }
+  
+  const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+  const data = await res.json();
+  const text = data.candidates[0].content.parts[0].text;
+  return schema ? JSON.parse(text) : text;
+}
+
+const aiCaseSchema = {
+  type: "OBJECT",
+  properties: {
+    title: { type: "STRING" },
+    author: { type: "STRING" },
+    publication: { type: "STRING" },
+    date: { type: "STRING" },
+    type: { type: "STRING" },
+    excerpt: { type: "STRING" },
+    ansAuthority: { type: "BOOLEAN" },
+    ansCurrency: { type: "BOOLEAN" },
+    ansPeer: { type: "BOOLEAN" },
+    ansBias: { type: "BOOLEAN" },
+    isAdmissible: { type: "BOOLEAN" },
+    explanation: { type: "STRING" }
+  }
+};
+
+let state = {
+  playerName: "",
+  persona: null,
+  isCustomMode: false,
+  topic: "",
+  cases: [],
+  currentCaseIdx: 0,
+  currentCaseObj: null,
+  rep: 0,
+  streak: 0,
+  maxStreak: 0,
+  strikes: 0,
+  currentAnswers: { authority: null, currency: null, peer: null, bias: null }
+};
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+function updateHUD() {
+  document.getElementById("hudRep").textContent = Math.floor(state.rep);
+  document.getElementById("hudStreak").textContent = `${state.streak} 🔥`;
+  if (state.streak >= 3) document.getElementById("hudStreak").style.color = "#fbbf24";
+  else document.getElementById("hudStreak").style.color = "inherit";
+
+  for(let i=1; i<=3; i++) {
+    const icon = document.getElementById(`s${i}`);
+    if (state.strikes >= i) icon.classList.add('lost');
+    else icon.classList.remove('lost');
+  }
+}
+
+function selectPersona(type) {
+  state.persona = type;
+  document.querySelectorAll('.persona-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.p-${type.substring(0,4)}`).classList.add('selected');
+}
+
+function answerQ(qType, val) {
+  state.currentAnswers[qType] = val;
+  const yBtn = document.getElementById(`btn-q-${qType.substring(0,4)}-y`);
+  const nBtn = document.getElementById(`btn-q-${qType.substring(0,4)}-n`);
+  
+  // Reset
+  yBtn.style.background = "var(--surface)"; yBtn.style.borderColor = "var(--line-strong)"; yBtn.style.color = "var(--text)";
+  nBtn.style.background = "var(--surface)"; nBtn.style.borderColor = "var(--line-strong)"; nBtn.style.color = "var(--text)";
+
+  // Highlight
+  if (val === true) {
+    yBtn.style.background = "rgba(16, 185, 129, 0.1)"; yBtn.style.borderColor = "var(--admit)"; yBtn.style.color = "var(--admit)";
+  } else {
+    nBtn.style.background = "rgba(239, 68, 68, 0.1)"; nBtn.style.borderColor = "var(--dismiss)"; nBtn.style.color = "var(--dismiss)";
+  }
+}
+
+async function startGame(isCustom) {
+  const name = document.getElementById("inp-name").value.trim();
+  const errorBox = document.getElementById("error-message");
+  
+  if (!name) { 
+    errorBox.textContent = "Step 1: Please enter your name to take the oath.";
+    errorBox.style.display = "block";
+    return; 
+  }
+  if (!state.persona) {
+    errorBox.textContent = "Step 2: Please select a Playstyle (Persona) before starting.";
+    errorBox.style.display = "block";
+    return;
+  }
+
+  if (isCustom) {
+    state.topic = document.getElementById("inp-topic").value.trim();
+    if (!state.topic) { 
+        errorBox.textContent = "Step 3: Please enter a topic for the Custom AI Practice.";
+        errorBox.style.display = "block";
+        return; 
+    }
+    if (!apiKey) {
+        errorBox.textContent = "API Key missing. Custom Practice cannot connect to AI Director.";
+        errorBox.style.display = "block";
+        return;
+    }
+  }
+  
+  errorBox.style.display = "none";
+  state.playerName = name;
+  state.rep = 0; state.streak = 0; state.maxStreak = 0; state.strikes = 0;
+  state.currentCaseIdx = 0; state.isCustomMode = isCustom;
+
+  if (isCustom) {
+    await fetchNextAICase();
+  } else {
+    state.cases = [...DEFAULT_CASES];
+    state.currentCaseObj = state.cases[0];
+    loadCase();
+  }
+}
+
+async function fetchNextAICase() {
+  document.getElementById("aiLoadingModal").classList.add("active");
+  try {
+    const sysPrompt = `You are an AP Research teacher generating a source evaluation exercise. 
+    Topic: ${state.topic}. 
+    Create a highly realistic source. Randomly decide if it should be an excellent, admissible peer-reviewed source OR a flawed, dismissable source. Fill out the boolean answers accurately.`;
+    
+    const customCase = await callGeminiAPI("Generate a new source to evaluate.", sysPrompt, aiCaseSchema);
+    state.currentCaseObj = customCase;
+    document.getElementById("aiLoadingModal").classList.remove("active");
+    loadCase();
+  } catch (e) {
+    document.getElementById("aiLoadingModal").classList.remove("active");
+    alert("The AI Director failed to generate the next docket. Check connection or API Key.");
+  }
+}
+
+function loadCase() {
+  const c = state.currentCaseObj;
+  state.currentAnswers = { authority: null, currency: null, peer: null, bias: null };
+
+  // Reset UI Buttons
+  ['auth', 'curr', 'peer', 'bias'].forEach(q => {
+      ['y', 'n'].forEach(b => {
+          const btn = document.getElementById(`btn-q-${q}-${b}`);
+          btn.style.background = "var(--surface)"; btn.style.borderColor = "var(--line-strong)"; btn.style.color = "var(--text)";
+      });
+  });
+  
+  updateHUD();
+  
+  document.getElementById("cfTitle").textContent = c.title;
+  document.getElementById("cfAuthor").textContent = c.author;
+  document.getElementById("cfPub").textContent = c.publication;
+  document.getElementById("cfDate").textContent = c.date;
+  document.getElementById("cfType").textContent = c.type;
+  document.getElementById("cfExcerpt").innerHTML = `"${c.excerpt}"`;
+
+  showScreen("court");
+}
+
+function submitRuling(playerRuling) {
+  const c = state.currentCaseObj;
+  const rulingCorrect = (playerRuling === c.isAdmissible);
+  let repEarned = 0;
+  
+  if (rulingCorrect) {
+    state.streak++;
+    if (state.streak > state.maxStreak) state.maxStreak = state.streak;
+    
+    let multiplier = 1 + (state.streak * 0.1);
+    repEarned = Math.floor(50 * multiplier);
+    
+    const checks = [
+      { key: 'authority', correct: c.ansAuthority }, { key: 'currency',  correct: c.ansCurrency },
+      { key: 'peer', correct: c.ansPeer }, { key: 'bias', correct: c.ansBias }
+    ];
+    checks.forEach(chk => {
+      if (state.currentAnswers[chk.key] === chk.correct) {
+        let pts = Math.floor(10 * multiplier);
+        if (state.persona === chk.key) pts *= 2; 
+        repEarned += pts;
+      }
+    });
+    state.rep += repEarned;
+  } else {
+    state.strikes++;
+    state.streak = 0; 
+  }
+
+  updateHUD();
+  buildVerdictScreen(rulingCorrect, playerRuling, c, repEarned);
+}
+
+function buildVerdictScreen(rulingCorrect, playerRuling, c, repEarned) {
+  const stampEl = document.getElementById("verdictStamp");
+  stampEl.textContent = playerRuling ? "ADMISSIBLE" : "DISMISSED";
+  stampEl.className = `stamp ${rulingCorrect ? 'good' : 'bad'}`;
+
+  const promoEl = document.getElementById("verdictPromo");
+  if (rulingCorrect) {
+    promoEl.textContent = `JUDGMENT UPHELD (+1 STREAK)`;
+    promoEl.style.background = "rgba(16, 185, 129, 0.1)"; promoEl.style.color = "var(--admit)"; promoEl.style.border = "1px solid var(--admit)";
+    document.getElementById("verdictRoundScore").textContent = `+${repEarned} SCORE`;
+  } else {
+    promoEl.textContent = `OBJECTION SUSTAINED (-1 STRIKE)`;
+    promoEl.style.background = "rgba(239, 68, 68, 0.1)"; promoEl.style.color = "var(--dismiss)"; promoEl.style.border = "1px solid var(--dismiss)";
+    document.getElementById("verdictRoundScore").textContent = `+0 SCORE`;
+  }
+
+  document.getElementById("verdictExp").innerHTML = `<strong>Actual Ruling: ${c.isAdmissible ? 'Admissible' : 'Dismissed'}.</strong><br>${c.explanation}`;
+  
+  const resultsHTML = [];
+  const checks = [
+    { key: 'authority', name: 'Authority', correct: c.ansAuthority },
+    { key: 'currency',  name: 'Currency',  correct: c.ansCurrency },
+    { key: 'peer',      name: 'Rigor', correct: c.ansPeer },
+    { key: 'bias',      name: 'Objectivity',  correct: c.ansBias }
+  ];
+
+  checks.forEach(chk => {
+    const playerAns = state.currentAnswers[chk.key];
+    if (playerAns !== null) {
+      const isCorrect = (playerAns === chk.correct);
+      const color = isCorrect ? "var(--admit)" : "var(--dismiss)";
+      resultsHTML.push(`
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border-left: 4px solid ${color};">
+          <span style="font-size: 0.9rem; font-weight: 600;">${chk.name}: You guessed ${playerAns ? 'Passes' : 'Fails'} (Actually ${chk.correct ? 'Passes' : 'Fails'})</span>
+        </div>
+      `);
+    }
+  });
+  document.getElementById("ceResultsBox").innerHTML = resultsHTML.length > 0 ? resultsHTML.join("") : "<p style='color: var(--muted); font-size: 0.9rem;'>No evidence gathering attempted.</p>";
+
+  const btnAI = document.getElementById("btnAskAI");
+  if (apiKey) {
+      document.getElementById("aiDebriefZone").style.display = "block";
+      document.getElementById("aiExpBox").style.display = "none";
+      btnAI.style.display = "block";
+      btnAI.textContent = "✨ Ask AI Director for detailed breakdown";
+      btnAI.disabled = false;
+  }
+
+  showScreen("verdict");
+}
+
+async function askAIForDebrief() {
+  const c = state.currentCaseObj;
+  const btn = document.getElementById("btnAskAI");
+  const box = document.getElementById("aiExpBox");
+  btn.textContent = "Analyzing source..."; btn.disabled = true;
+
+  try {
+    const sysPrompt = `You are a legal/academic mentor. The student evaluated this source:\nTitle: ${c.title}\nExcerpt: ${c.excerpt}\nProvide a 2-sentence encouraging explanation of WHY this source is ${c.isAdmissible ? 'Admissible' : 'Dismissed'} based on AP Research standards.`;
+    const exp = await callGeminiAPI("Analyze this source.", sysPrompt);
+    box.innerHTML = `<strong>✨ AI Chief Justice:</strong> ${exp}`;
+    box.style.display = "block"; btn.style.display = "none";
+  } catch (e) {
+    btn.textContent = "Connection lost. Try again."; btn.disabled = false;
+  }
+}
+
+async function nextCase() {
+  if (state.strikes >= 3) {
+    showEndScreenData();
+    return;
+  }
+  if (state.isCustomMode) {
+    await fetchNextAICase();
+  } else {
+    state.currentCaseIdx++;
+    if (state.currentCaseIdx >= state.cases.length) {
+      document.getElementById('endTitle').textContent = "TUTORIAL CLEARED";
+      document.getElementById('endTitle').style.color = "var(--admit)";
+      document.getElementById('endRank').textContent = "Tutorial Complete. Ready for Custom Practice Mode.";
+      document.getElementById('endCard').style.borderColor = "var(--admit)";
+      showEndScreenData();
+    } else {
+      state.currentCaseObj = state.cases[state.currentCaseIdx];
+      loadCase();
+    }
+  }
+}
+
+function showEndScreenData() {
+  let currentScore = 0;
+  let targetScore = state.rep;
+  let step = Math.max(1, Math.floor(targetScore / 40));
+  let scoreEl = document.getElementById("endRep");
+  
+  let timer = setInterval(() => {
+    currentScore += step;
+    if(currentScore >= targetScore) { currentScore = targetScore; clearInterval(timer); }
+    scoreEl.textContent = currentScore;
+  }, 30);
+
+  document.getElementById("endStreak").textContent = `${state.maxStreak} 🔥`;
+  showScreen("end");
+}
+</script>
 </body>
 </html>
