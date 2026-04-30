@@ -233,275 +233,161 @@
       </div>
     `;
   }
-  function renderCourt() {
+ function renderCourt() {
     const session = state.session;
     const source = getCurrentCase();
     const persona = getPersona(state.profile.personaId);
-    const rankProgress = getRankProgress();
-    const tutorial = shouldShowTutorial(source);
 
     return `
       <div class="screen">
         ${renderTopbar()}
-        <div class="court-grid">
-          <div class="sidebar-stack">
-            <section class="case-card">
-              <div class="eyebrow">${source.difficulty} difficulty | ${source.skillFocus}</div>
-              <h1 class="section-title">${source.title}</h1>
-              <div class="tag-row">
-                <span class="tag">${source.type}</span>
-                <span class="tag">${session.modeLabel}</span>
-                <span class="tag">${source.skillFocus}</span>
-              </div>
-              <dl class="case-meta">
-                <dt>Author</dt><dd>${source.author}</dd>
-                <dt>Publication</dt><dd>${source.publication}</dd>
-                <dt>Date</dt><dd>${source.date}</dd>
-                <dt>Purpose</dt><dd>${buildPurposeRead(source)}</dd>
-              </dl>
-              <div class="excerpt">"${source.excerpt}"</div>
-            </section>
-
-            <section class="panel">
-              <div class="panel-title">Cross-Examination Notes</div>
-              <div class="muted small">Optional, but lucrative. Every correct note teaches the criterion, boosts score, and sharpens your verdict logic.</div>
-              <div class="criteria-grid">
-                ${data.criteria.map((criterion) => renderCriteriaJudgeCard(criterion, source, session)).join('')}
-              </div>
-            </section>
-
-            <section class="panel">
-              <div class="panel-title">Ruling</div>
-              <div class="muted small">Rule the source itself, not just one isolated detail. A current source can still fail if its expertise or objectivity collapses.</div>
-              <div class="ruling-grid">
-                <button class="ruling-button admit" data-action="submit-verdict" data-verdict="admit">
-                  <strong>Rule Admissible</strong>
-                  <span>Credible enough for academic use</span>
-                </button>
-                <button class="ruling-button dismiss" data-action="submit-verdict" data-verdict="dismiss">
-                  <strong>Rule Dismissed</strong>
-                  <span>Weak, biased, outdated, or unvetted</span>
-                </button>
-              </div>
-            </section>
+        <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+            <div>
+              <div class="eyebrow" style="color: var(--gold); margin-bottom: 5px;">${source.difficulty} difficulty | ${source.skillFocus}</div>
+              <h1 style="font-size: 2.2rem; font-family: var(--display); margin: 0;">${source.title}</h1>
+            </div>
+            <div class="tag-row">
+              <span class="tag">${source.type}</span>
+              <span class="tag">${session.modeLabel}</span>
+            </div>
           </div>
 
-          <aside class="sidebar-stack">
-            <section class="bench-brief">
-              <div class="eyebrow">Mission</div>
-              <div class="panel-title">${session.objectiveTitle}</div>
-              <div class="muted small">${session.objectiveText}</div>
-              ${
-                tutorial
-                  ? `
-                    <div class="tutorial-callout">
-                      <strong>First-case walkthrough</strong>
-                      <div class="muted small">Start with metadata, answer at least two note cards, then decide whether the source belongs in academic research. The four criteria cards are your whole playbook.</div>
-                    </div>
-                  `
-                  : ''
-              }
-              <div class="rule-note">
-                <strong>Optional notes do three things:</strong>
-                <div class="muted small">They teach the criteria, they pay out extra score, and they reveal whether your reasoning is actually consistent before the verdict lands.</div>
-              </div>
-            </section>
+          <div class="case-card" style="margin-bottom: 30px; padding: 30px; background: var(--surface); border-top: 4px solid var(--gold); border-radius: var(--radius-md); box-shadow: var(--shadow);">
+            <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px 20px; border-bottom: 1px solid var(--line); padding-bottom: 20px; margin-bottom: 20px;">
+              <span style="color: var(--gold); font-size: 0.8rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em;">Author</span>
+              <span style="font-weight: 500; color: var(--text);">${source.author}</span>
+              <span style="color: var(--gold); font-size: 0.8rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em;">Publication</span>
+              <span style="font-weight: 500; color: var(--text);">${source.publication}</span>
+              <span style="color: var(--gold); font-size: 0.8rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em;">Date</span>
+              <span style="font-weight: 500; color: var(--text);">${source.date}</span>
+              <span style="color: var(--gold); font-size: 0.8rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em;">Purpose</span>
+              <span style="font-weight: 500; color: var(--text);">${buildPurposeRead(source)}</span>
+            </div>
+            <div class="excerpt-box" style="font-family: var(--body); font-size: 1.25rem; line-height: 1.8; color: #e2e8f0; border-left: 3px solid var(--gold); padding-left: 20px; font-style: italic;">
+              "${source.excerpt}"
+            </div>
+          </div>
 
-            <section class="power-card">
-              <div class="eyebrow">Persona Power</div>
-              <div class="panel-title">${persona.name}</div>
-              <div class="muted small">${persona.perk}</div>
-              <div class="rule-note">
-                <strong>${persona.powerTitle}</strong>
-                <div class="muted small">${persona.powerDesc}</div>
-              </div>
-              <button class="button ghost" data-action="use-power" ${session.powerUsed ? 'disabled' : ''}>
-                ${session.powerUsed ? 'Power Already Used' : 'Use Bench Power'}
+          <div class="panel" style="margin-bottom: 30px; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--radius-md);">
+            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 15px; margin-bottom: 20px;">
+              <h3 style="color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.1rem; margin: 0;">Cross-Examination</h3>
+              <span class="muted small">Optional | +Score for correct checks</span>
+            </div>
+            <div style="display: grid; gap: 15px;">
+              ${data.criteria.map((criterion) => renderCriteriaJudgeCard(criterion, source, session)).join('')}
+            </div>
+          </div>
+
+          <div class="panel" style="padding: 30px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--radius-md); text-align: center;">
+            <h3 style="color: var(--text); font-size: 1.4rem; margin: 0 0 5px 0;">Issue Your Ruling</h3>
+            <div class="muted small" style="margin-bottom: 25px;">Rule the source itself. A current source can still fail if its expertise or objectivity collapses.</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <button class="ruling-button" data-action="submit-verdict" data-verdict="admit" style="padding: 20px; background: rgba(16, 185, 129, 0.05); border: 2px solid rgba(16, 185, 129, 0.4); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;">
+                <strong style="display: block; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--admit); margin-bottom: 5px;">Rule Admissible</strong>
+                <span style="font-size: 0.85rem; color: var(--text); opacity: 0.8;">Credible & Academic</span>
               </button>
-            </section>
+              <button class="ruling-button" data-action="submit-verdict" data-verdict="dismiss" style="padding: 20px; background: rgba(239, 68, 68, 0.05); border: 2px solid rgba(239, 68, 68, 0.4); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s;">
+                <strong style="display: block; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dismiss); margin-bottom: 5px;">Rule Dismissed</strong>
+                <span style="font-size: 0.85rem; color: var(--text); opacity: 0.8;">Flawed or Biased</span>
+              </button>
+            </div>
+          </div>
 
-            <section class="career-banner">
-              <div class="eyebrow">Career Track</div>
-              <div class="panel-title">${getCurrentRank().title}</div>
-              <div class="meter"><div class="meter-fill" style="width:${rankProgress.percent}%"></div></div>
-              <div class="muted small">${rankProgress.current} / ${rankProgress.needed} XP to ${rankProgress.nextTitle}</div>
-              <div class="score-grid run">
-                <div class="score-box">
-                  <div class="muted small">Run Score</div>
-                  <strong>${formatNumber(session.score)}</strong>
-                </div>
-                <div class="score-box">
-                  <div class="muted small">Streak</div>
-                  <strong>${session.streak}</strong>
-                </div>
-                <div class="score-box">
-                  <div class="muted small">Strikes</div>
-                  <strong>${session.strikes}</strong>
-                </div>
-                <div class="score-box">
-                  <div class="muted small">Career XP</div>
-                  <strong>${state.profile.careerXp}</strong>
-                </div>
-              </div>
-            </section>
-
-            <section class="panel">
-              <div class="panel-title">Scoring Brief</div>
-              <div class="rule-note">
-                <strong>Correct verdict</strong>
-                <div class="muted small">Big reputation payout plus streak growth.</div>
-              </div>
-              <div class="rule-note">
-                <strong>Correct note cards</strong>
-                <div class="muted small">Score bonus, stronger feedback, and double points on your persona focus.</div>
-              </div>
-              <div class="rule-note">
-                <strong>Wrong verdict</strong>
-                <div class="muted small">You keep a little note credit, but you lose the ruling bonus and take a strike.</div>
-              </div>
-            </section>
-          </aside>
+          <div style="height: 100px;"></div>
         </div>
       </div>
     `;
   }
 
   function renderVerdict() {
-    const outcome = state.session.lastOutcome;
-    const rankProgress = getRankProgress();
+    const session = state.session;
+    const caseRecord = session.history[session.history.length - 1];
+    const isCorrect = caseRecord.correct;
+    const color = isCorrect ? 'var(--admit)' : 'var(--dismiss)';
+    const bg = isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)';
+
     return `
       <div class="screen">
         ${renderTopbar()}
-        <div class="verdict-grid">
-          <section class="sidebar-stack">
-            <div class="verdict-hero panel">
-              <div class="stamp ${outcome.correctVerdict ? 'good' : 'bad'}">${outcome.playerVerdict ? 'Admissible' : 'Dismissed'}</div>
-              <div class="status-pill ${outcome.correctVerdict ? 'good' : 'bad'}">
-                ${outcome.correctVerdict ? 'Judgment Upheld' : 'Objection Sustained'}
-              </div>
-              <div class="screen-title">${outcome.correctVerdict ? `+${formatNumber(outcome.scoreGain)} score` : `${outcome.strikeText}`}</div>
-              <div class="muted">${outcome.verdictReason}</div>
+        <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+          
+          <div style="text-align: center; margin: 40px 0;">
+            <div style="display: inline-flex; align-items: center; justify-content: center; padding: 15px 40px; border-radius: 8px; border: 4px solid ${color}; transform: rotate(-3deg); font-size: 3rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: ${color}; text-shadow: 0 0 20px ${color}; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+              ${caseRecord.playerVerdict === 'admit' ? 'ADMISSIBLE' : 'DISMISSED'}
             </div>
-
-            <div class="score-breakdown">
-              <div class="panel-title">Score Breakdown</div>
-              <div class="breakdown-row"><span>Ruling bonus</span><strong>${formatNumber(outcome.rulingPoints)}</strong></div>
-              <div class="breakdown-row"><span>Correct cross-exam notes</span><strong>${formatNumber(outcome.notePoints)}</strong></div>
-              <div class="breakdown-row"><span>Full-note mastery bonus</span><strong>${formatNumber(outcome.masteryBonus)}</strong></div>
-              <div class="breakdown-row"><span>Streak pressure bonus</span><strong>${formatNumber(outcome.streakBonus)}</strong></div>
-              <div class="breakdown-row"><span>Multiplier</span><strong>x${outcome.multiplier.toFixed(2)}</strong></div>
-              <div class="breakdown-row"><span>Career XP gained</span><strong>${formatNumber(outcome.xpGain)}</strong></div>
+            <div style="margin-top: 25px;">
+              <span style="display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em; background: ${bg}; color: ${color}; border: 1px solid ${color};">
+                ${isCorrect ? 'JUDGMENT UPHELD (+1 STREAK)' : 'OBJECTION SUSTAINED (STRIKE)'}
+              </span>
             </div>
-          </section>
-
-          <aside class="sidebar-stack">
-            <section class="panel">
-              <div class="panel-title">Chief Justice Debrief</div>
-              <div class="muted">${outcome.debrief}</div>
-              <div class="rule-note">
-                <strong>Skill practiced</strong>
-                <div class="muted small">${outcome.skillFocus}</div>
-              </div>
-              <div class="rule-note">
-                <strong>Teaching point</strong>
-                <div class="muted small">${outcome.teachingPoint}</div>
-              </div>
-            </section>
-
-            <section class="panel">
-              <div class="panel-title">Criterion Review</div>
-              <div class="criterion-review">
-                ${outcome.criterionRows.map(renderOutcomeCriterionRow).join('')}
-              </div>
-            </section>
-
-            <section class="career-banner">
-              <div class="eyebrow">Career Track</div>
-              <div class="panel-title">${getCurrentRank().title}</div>
-              <div class="meter"><div class="meter-fill" style="width:${rankProgress.percent}%"></div></div>
-              <div class="muted small">${rankProgress.current} / ${rankProgress.needed} XP to ${rankProgress.nextTitle}</div>
-              ${
-                outcome.unlocks.length
-                  ? `<div class="tag-row">${outcome.unlocks.map((unlock) => `<span class="tag">${unlock}</span>`).join('')}</div>`
-                  : ''
-              }
-            </section>
-
-            <div class="single-button-row">
-              <button class="button secondary" data-action="ask-ai-debrief">${outcome.aiButtonLabel}</button>
-              ${outcome.aiDebrief ? `<div class="rule-note"><strong>AI Director</strong><div class="muted small">${outcome.aiDebrief}</div></div>` : ''}
-              <button class="button primary" data-action="next-case">Next Case</button>
+            <div style="font-size: 2rem; font-weight: bold; color: var(--gold); font-family: monospace; margin-top: 20px;">
+              +${caseRecord.scoreEarned} XP
             </div>
-          </aside>
+          </div>
+
+          <div class="panel" style="margin-bottom: 30px; background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 30px;">
+            <h3 style="color: var(--gold); text-transform: uppercase; font-size: 1.1rem; border-bottom: 1px solid var(--line); padding-bottom: 15px; margin-bottom: 20px;">Chief Justice Debrief</h3>
+            <div style="font-size: 1.15rem; line-height: 1.6; margin-bottom: 30px; color: var(--text);">
+              <strong style="color: ${caseRecord.source.ruling === 'admit' ? 'var(--admit)' : 'var(--dismiss)'}">Actual Ruling: ${caseRecord.source.ruling === 'admit' ? 'Admissible' : 'Dismissed'}.</strong><br>
+              <div style="margin-top: 10px;">${caseRecord.source.explanation}</div>
+            </div>
+            
+            <div style="display: grid; gap: 12px; margin-bottom: 30px;">
+              ${Object.entries(caseRecord.notes).map(([critId, correct]) => {
+                const crit = data.criteria.find(c => c.id === critId);
+                const noteColor = correct ? "var(--admit)" : "var(--dismiss)";
+                return `
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding: 15px; background: rgba(0,0,0,0.4); border-radius: 8px; border-left: 4px solid ${noteColor};">
+                    <span style="font-size: 1rem; font-weight: 600;">${crit.name}: ${correct ? 'Correct' : 'Incorrect'} Note</span>
+                    <span style="color: var(--gold); font-family: monospace; font-size: 1.1rem;">+${correct ? caseRecord.noteScoreBreakdown[critId] : 0} XP</span>
+                  </div>
+                `;
+              }).join('')}
+              ${Object.keys(caseRecord.notes).length === 0 ? "<p style='color: var(--muted); font-size: 1rem; text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 8px;'>No evidence gathering attempted.</p>" : ""}
+            </div>
+          </div>
+
+          <button class="button primary" style="width: 100%; padding: 25px; font-size: 1.3rem; border-radius: var(--radius-md);" data-action="next-case">Bring in the Next Source</button>
+          <div style="height: 100px;"></div>
         </div>
       </div>
     `;
   }
 
-  function renderSummary() {
-    const summary = state.session.summary;
+  function renderEnd() {
+    const session = state.session;
+    const runScore = session.score;
+    const runStreak = session.maxStreak;
+    const isMistrial = session.strikes >= 3;
+    const title = isMistrial ? "MISTRIAL" : "DOCKET CLEARED";
+    const subtitle = isMistrial ? "You Have Been Disbarred (3 Strikes)" : "Campaign Progress Secured";
+    const color = isMistrial ? "var(--dismiss)" : "var(--admit)";
+
     return `
       <div class="screen">
         ${renderTopbar()}
-        <div class="hero-grid">
-          <section class="hero-main">
-            <div>
-              <div class="eyebrow">${summary.modeLabel}</div>
-              <h1 class="screen-title">${summary.title}</h1>
-              <p class="muted">${summary.comment}</p>
-            </div>
-            <div class="tag-row">
-              ${summary.unlocks.map((unlock) => `<span class="tag">${unlock}</span>`).join('') || '<span class="tag">No new unlocks this run</span>'}
-            </div>
-            <div class="button-row">
-              ${summary.primaryAction}
-              <button class="button ghost" data-action="retry-run">Retry Run</button>
-            </div>
-          </section>
-          <aside class="hero-side">
-            <div class="summary-grid">
-              <div class="summary-card">
-                <h3>Run Score</h3>
-                <div class="screen-title">${formatNumber(summary.score)}</div>
+        <div style="max-width: 600px; margin: 40px auto; text-align: center; padding: 20px;">
+          <div class="panel" style="padding: 50px 30px; background: var(--surface); border: 1px solid var(--line); border-top: 4px solid ${color}; border-radius: var(--radius-lg); box-shadow: var(--shadow);">
+            <div style="font-size: 3.5rem; font-weight: 900; text-transform: uppercase; font-family: var(--display); margin-bottom: 10px; color: ${color};">${title}</div>
+            <div style="color: var(--muted); font-size: 1.3rem; margin-bottom: 40px;">${subtitle}</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 40px;">
+              <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 12px; border: 1px solid var(--line);">
+                <div style="font-size: 3rem; font-weight: bold; color: var(--gold); font-family: monospace;">${runScore}</div>
+                <div style="font-size: 0.9rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em; color: var(--muted); margin-top: 5px;">Run XP Earned</div>
               </div>
-              <div class="summary-card">
-                <h3>Career XP</h3>
-                <div class="screen-title">${formatNumber(summary.xp)}</div>
-              </div>
-              <div class="summary-card">
-                <h3>Best Streak</h3>
-                <div class="screen-title">${summary.bestStreak}</div>
+              <div style="background: rgba(0,0,0,0.4); padding: 25px; border-radius: 12px; border: 1px solid var(--line);">
+                <div style="font-size: 3rem; font-weight: bold; color: #fbbf24; font-family: monospace;">${runStreak}</div>
+                <div style="font-size: 0.9rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.1em; color: var(--muted); margin-top: 5px;">Best Streak</div>
               </div>
             </div>
-            <div class="badge-card">
-              <div class="panel-title">Run Review</div>
-              <div class="muted small">Correct verdicts ${summary.correctVerdicts} | Incorrect verdicts ${summary.incorrectVerdicts} | Cross-exam hits ${summary.correctNotes}</div>
-            </div>
-          </aside>
-        </div>
-
-        <section class="panel">
-          <div class="eyebrow">Promotions And Achievements</div>
-          <div class="panel-title">What Changed</div>
-          <div class="criteria-grid">
-            <div class="summary-card">
-              <h3>Promotion Track</h3>
-              <div class="muted small">${summary.promotionText}</div>
-            </div>
-            <div class="summary-card">
-              <h3>Career Title</h3>
-              <div class="muted small">${getCurrentRank().title}</div>
-            </div>
-            <div class="summary-card">
-              <h3>Longest Streak</h3>
-              <div class="muted small">${summary.bestStreak}</div>
-            </div>
-            <div class="summary-card">
-              <h3>Judicial Record</h3>
-              <div class="muted small">${formatNumber(state.profile.correctVerdicts)} correct | ${formatNumber(state.profile.incorrectVerdicts)} incorrect</div>
-            </div>
+            
+            <button class="button primary" style="width: 100%; padding: 25px; font-size: 1.3rem; border-radius: var(--radius-md);" data-action="return-home">Return to Main Menu</button>
           </div>
-        </section>
+        </div>
       </div>
     `;
   }
