@@ -154,170 +154,86 @@
     const rank = getCurrentRank();
     const progress = getRankProgress();
     const currentDocket = getNextCampaignDocket();
-    const recentAchievements = state.profile.achievements.slice(-4);
 
     return `
       <div class="screen">
         ${renderTopbar()}
         <div class="hero-grid">
+          
           <section class="hero-main">
             <div>
               <div class="eyebrow">Judicial Career</div>
-              <h1 class="screen-title">Rule Better Sources</h1>
-              <p class="muted">
+              <h1 class="screen-title" style="font-size: 3rem; margin-bottom: 10px;">Rule Better Sources</h1>
+              <p class="muted" style="margin-bottom: 30px;">
                 Review metadata, weigh authority, currency, rigor, and objectivity, and decide whether a source belongs in serious academic research.
               </p>
             </div>
-            <div class="tag-row">
-              <span class="tag">${currentDocket.chapter}</span>
-              <span class="tag">${currentDocket.name}</span>
-              <span class="tag">${currentDocket.promotion}</span>
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px;">
+              <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span style="background: var(--gold); color: #000; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1rem; font-weight: 900;">1</span> Enter Your Name
+              </div>
+              <input id="judge-name" data-field="name" type="text" value="${escapeHtml(state.profile.name)}" placeholder="Judge's Last Name (e.g., Smith)" style="width: 100%; max-width: 400px; padding: 12px; border-radius: 4px; border: 1px solid var(--line-strong); background: var(--bg); color: white;" />
             </div>
-            <div class="button-row">
-              <button class="button primary" data-action="start-campaign">Continue Campaign</button>
-              <button class="button secondary" data-action="start-survival">Start Survival Docket</button>
+
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 20px;">
+              <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span style="background: var(--gold); color: #000; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1rem; font-weight: 900;">3</span> Start the Docket
+              </div>
+              <div class="tag-row" style="margin-bottom: 12px;">
+                <span class="tag">${currentDocket.chapter}</span>
+                <span class="tag">${currentDocket.name}</span>
+                <span class="tag">${currentDocket.promotion}</span>
+              </div>
+              <div class="button-row" style="margin-top: 15px;">
+                <button class="button primary" data-action="start-campaign">⚖️ Continue Campaign</button>
+                <button class="button secondary" data-action="start-survival">Start Survival Docket</button>
+              </div>
             </div>
           </section>
+          
           <aside class="hero-side">
+            
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px;">
+              <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <span style="background: var(--gold); color: #000; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1rem; font-weight: 900;">2</span> Select Playstyle
+              </div>
+              <p class="muted small" style="margin-bottom: 15px;">Your persona grants you double points for correctly evaluating specific criteria.</p>
+              
+              <div class="persona-grid" style="display: flex; flex-direction: column; gap: 10px;">
+                ${data.personas.map(renderPersonaCard).join('')}
+              </div>
+            </div>
+
             <div class="career-banner">
               <div class="eyebrow">Long-Term Progress</div>
               <div class="panel-title">${rank.title}</div>
               <div class="meter"><div class="meter-fill" style="width:${progress.percent}%"></div></div>
               <div class="muted small">${progress.current} / ${progress.needed} XP to ${progress.nextTitle}</div>
-              <div class="career-stats">
-                <div class="stat-card">
-                  <div class="muted small">Cases Closed</div>
-                  <strong>${state.profile.casesCompleted}</strong>
-                </div>
-                <div class="stat-card">
-                  <div class="muted small">Best Streak</div>
-                  <strong>${state.profile.bestStreak}</strong>
-                </div>
-                <div class="stat-card">
-                  <div class="muted small">Dockets Open</div>
-                  <strong>${state.profile.unlockedDocketCount}</strong>
-                </div>
-              </div>
-            </div>
-            <div class="badge-card">
-              <div class="panel-title">Recent Achievements</div>
-              <div class="tag-row">
-                ${
-                  recentAchievements.length
-                    ? recentAchievements.map((badge) => `<span class="tag">${badge}</span>`).join('')
-                    : '<span class="muted small">No badges yet. The record is still clean and boring.</span>'
-                }
-              </div>
             </div>
           </aside>
         </div>
 
-        <div class="home-grid">
+        <div class="home-grid" style="margin-top: 20px;">
           <section class="panel">
-            <div class="eyebrow">Take The Oath</div>
-            <div class="panel-title">Judicial Identity</div>
+            <div class="eyebrow">Endless Mode</div>
+            <div class="panel-title">Custom Topic Practice</div>
             <div class="field-stack">
               <label>
-                Judge Name
-                <input id="judge-name" data-field="name" type="text" value="${escapeHtml(state.profile.name)}" placeholder="Judge surname or handle" />
+                Topic
+                <input id="topic-draft" data-field="topicDraft" type="text" value="${escapeHtml(state.profile.topicDraft)}" placeholder="Social media, AI tutors, climate migration..." />
+              </label>
+              <label>
+                Gemini API Key (Optional)
+                <input id="api-key" data-field="apiKey" type="password" value="${escapeHtml(state.profile.apiKey)}" placeholder="Paste only if you want live AI dockets" />
               </label>
             </div>
-            <div class="panel-title">Choose A Persona</div>
-            <div class="muted small">Personas keep the same courtroom identity but make one review criterion more rewarding and add a once-per-run clue power.</div>
-            <div class="persona-grid">
-              ${data.personas.map(renderPersonaCard).join('')}
-            </div>
-          </section>
-
-          <section class="panel">
-            <div class="eyebrow">Mission Clarity</div>
-            <div class="panel-title">How A Case Works</div>
-            <div class="overview-grid">
-              <div class="rule-note">
-                <strong>1. Read the file.</strong>
-                <div class="muted small">Check author, publication, date, type, and the excerpt before you rush the verdict.</div>
-              </div>
-              <div class="rule-note">
-                <strong>2. Cross-examine the source.</strong>
-                <div class="muted small">Optional notes on the four criteria earn score, reinforce learning, and make verdicts less reckless.</div>
-              </div>
-              <div class="rule-note">
-                <strong>3. Rule it.</strong>
-                <div class="muted small">Call the source admissible or dismissed. Wrong rulings cost strikes. Three strikes ends the run.</div>
-              </div>
-              <div class="rule-note">
-                <strong>4. Learn and climb.</strong>
-                <div class="muted small">Every case pays out run score and career XP, so short-term pressure feeds long-term rank growth.</div>
-              </div>
-            </div>
+            <button class="button secondary" style="margin-top: 15px;" data-action="start-custom">✨ Start Custom Practice</button>
           </section>
         </div>
-
-        <section class="panel">
-          <div class="eyebrow">Modes</div>
-          <div class="panel-title">Choose Your Docket</div>
-          <div class="mode-grid">
-            <div class="mode-card">
-              <div>
-                <h3>Guided Campaign</h3>
-                <div class="muted small">Clear structured dockets, unlock promotions, and learn the four-factor test with rising difficulty.</div>
-              </div>
-              <div class="tag-row">
-                <span class="tag">${currentDocket.name}</span>
-                <span class="tag">${currentDocket.theme}</span>
-              </div>
-              <button class="button primary" data-action="start-campaign">Enter Campaign</button>
-            </div>
-            <div class="mode-card">
-              <div>
-                <h3>Appeals Survival</h3>
-                <div class="muted small">Random cases from your unlocked dockets. Score climbs until three strikes end the bench.</div>
-              </div>
-              <div class="tag-row">
-                <span class="tag">3 strikes</span>
-                <span class="tag">Best score ${formatNumber(state.profile.bestModeScores.survival)}</span>
-              </div>
-              <button class="button secondary" data-action="start-survival">Start Survival</button>
-            </div>
-            <div class="mode-card">
-              <div>
-                <h3>Custom Topic Practice</h3>
-                <div class="muted small">Use the AI Director if you have a Gemini API key. If not, the offline director fabricates local practice cases so the mode still works.</div>
-              </div>
-              <div class="field-stack">
-                <label>
-                  Topic
-                  <input id="topic-draft" data-field="topicDraft" type="text" value="${escapeHtml(state.profile.topicDraft)}" placeholder="Social media, AI tutors, climate migration..." />
-                </label>
-                <label>
-                  Gemini API Key (Optional)
-                  <input id="api-key" data-field="apiKey" type="password" value="${escapeHtml(state.profile.apiKey)}" placeholder="Paste only if you want live AI dockets" />
-                </label>
-              </div>
-              <button class="button secondary" data-action="start-custom">Start Custom Practice</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="eyebrow">Campaign Ladder</div>
-          <div class="panel-title">Judicial Promotions</div>
-          <div class="summary-grid">
-            ${data.dockets.map(renderDocketCard).join('')}
-          </div>
-        </section>
-
-        <section class="panel">
-          <div class="eyebrow">Bench Book</div>
-          <div class="panel-title">The Four Criteria</div>
-          <div class="criteria-grid">
-            ${data.criteria.map(renderCriteriaPreview).join('')}
-          </div>
-        </section>
       </div>
     `;
   }
-
   function renderCourt() {
     const session = state.session;
     const source = getCurrentCase();
