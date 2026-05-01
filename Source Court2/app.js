@@ -39,7 +39,7 @@
         campaign: 0,
         survival: 0,
         custom: 0
-      },
+      },      
       settings: {
         soundOn: true,
         reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -531,9 +531,10 @@
   }
 
   function handleClick(event) {
-    const target = event.target.closest('[data-action]');
-    if (!target) {
-      return;
+  // Grab the closest button or action-element, ignoring inner text/emojis
+  const target = event.target.closest('[data-action], button');
+  
+  if (!target) return; // If they clicked empty background space, do nothing
     }
 
     const action = target.getAttribute('data-action');
