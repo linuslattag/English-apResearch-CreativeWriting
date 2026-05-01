@@ -495,3 +495,21 @@ input:focus {
   50% { transform: translate(calc(-50% + 10px), -50%); }
   75% { transform: translate(calc(-50% - 10px), -50%); }
 }
+/* Prevent invisible elements from blocking button clicks */
+#live-region, 
+.sr-only, 
+.toast {
+  pointer-events: none !important;
+}
+
+/* Ensure buttons and anything inside them are always clickable */
+button, 
+[data-action] {
+  cursor: pointer;
+  pointer-events: auto !important;
+}
+
+button *, 
+[data-action] * {
+  pointer-events: none; /* Stops text/emojis from stealing the click */
+}
